@@ -1,10 +1,11 @@
 import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand } from '@aws-sdk/client-s3'
 
-// AWS 설정 - 환경 변수에서 가져오기 (trim 처리로 공백/줄바꿈 제거)
+// AWS 설정 - 환경 변수에서 가져오기 (강력한 trim 처리)
 const getEnvVar = (key, defaultValue = '') => {
   const value = import.meta.env[key]
   if (!value) return defaultValue
-  return String(value).trim()
+  // 모든 공백, 줄바꿈, 탭 제거
+  return String(value).trim().replace(/\s+/g, '')
 }
 
 const S3_BUCKET_NAME = getEnvVar('VITE_S3_BUCKET_NAME', 'funpik-development-media')
@@ -12,24 +13,33 @@ const AWS_ACCESS_KEY_ID = getEnvVar('VITE_AWS_ACCESS_KEY_ID', '')
 const AWS_SECRET_ACCESS_KEY = getEnvVar('VITE_AWS_SECRET_ACCESS_KEY', '')
 const AWS_S3_REGION = getEnvVar('VITE_AWS_S3_REGION', 'ap-northeast-2')
 
-// 디버깅용 로그 (개발 환경에서만)
-if (import.meta.env.DEV) {
-  console.log('AWS Config:', {
-    bucket: S3_BUCKET_NAME,
-    region: AWS_S3_REGION,
-    regionLength: AWS_S3_REGION.length,
-    hasAccessKey: !!AWS_ACCESS_KEY_ID,
-    hasSecretKey: !!AWS_SECRET_ACCESS_KEY,
+// 디버깅용 로그
+console.log('AWS Config:', {
+  bucket: S3_BUCKET_NAME,
+  region: `"${AWS_S3_REGION}"`,
+  regionLength: AWS_S3_REGION.length,
+  regionChars: AWS_S3_REGION.split('').map(c => `'${c}'`).join(''),
+  hasAccessKey: !!AWS_ACCESS_KEY_ID,
+  hasSecretKey: !!AWS_SECRET_ACCESS_KEY,
+  accessKeyLength: AWS_ACCESS_KEY_ID.length,
+})
+
+// 자격 증명 검증
+if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY) {
+  console.error('AWS 자격 증명이 설정되지 않았습니다.')
+  console.error('환경 변수 확인:', {
+    VITE_AWS_ACCESS_KEY_ID: import.meta.env.VITE_AWS_ACCESS_KEY_ID,
+    VITE_AWS_SECRET_ACCESS_KEY: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY ? '***설정됨***' : '없음',
   })
 }
 
 // S3 클라이언트 생성
 const s3Client = new S3Client({
   region: AWS_S3_REGION,
-  credentials: {
+  credentials: AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY ? {
     accessKeyId: AWS_ACCESS_KEY_ID,
     secretAccessKey: AWS_SECRET_ACCESS_KEY,
-  },
+  } : undefined,
 })
 
 /**
