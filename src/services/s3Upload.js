@@ -1,10 +1,10 @@
 import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand } from '@aws-sdk/client-s3'
 
-// AWS 설정 - 환경 변수에서 가져오기
-const S3_BUCKET_NAME = import.meta.env.VITE_S3_BUCKET_NAME || 'funpik-development-media'
-const AWS_ACCESS_KEY_ID = import.meta.env.VITE_AWS_ACCESS_KEY_ID || ''
-const AWS_SECRET_ACCESS_KEY = import.meta.env.VITE_AWS_SECRET_ACCESS_KEY || ''
-const AWS_S3_REGION = import.meta.env.VITE_AWS_S3_REGION || 'ap-northeast-2'
+// AWS 설정 - 환경 변수에서 가져오기 (trim 처리로 공백/줄바꿈 제거)
+const S3_BUCKET_NAME = (import.meta.env.VITE_S3_BUCKET_NAME || 'funpik-development-media').trim()
+const AWS_ACCESS_KEY_ID = (import.meta.env.VITE_AWS_ACCESS_KEY_ID || '').trim()
+const AWS_SECRET_ACCESS_KEY = (import.meta.env.VITE_AWS_SECRET_ACCESS_KEY || '').trim()
+const AWS_S3_REGION = (import.meta.env.VITE_AWS_S3_REGION || 'ap-northeast-2').trim()
 
 // S3 클라이언트 생성
 const s3Client = new S3Client({
