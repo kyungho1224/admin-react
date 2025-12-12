@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  admin-react:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: admin-react
+    ports:
+      - "80:80"  # HTTP 포트 - 외부 접속 가능
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - admin-network
+
+networks:
+  admin-network:
+    driver: bridge
