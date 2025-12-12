@@ -12,7 +12,10 @@ const getEnvVar = (key, defaultValue = '') => {
 const S3_BUCKET_NAME = getEnvVar('VITE_S3_BUCKET_NAME', 'funpik-development-media')
 const AWS_ACCESS_KEY_ID = getEnvVar('VITE_AWS_ACCESS_KEY_ID', '')
 const AWS_SECRET_ACCESS_KEY = getEnvVar('VITE_AWS_SECRET_ACCESS_KEY', '')
-const AWS_S3_REGION = getEnvVar('VITE_AWS_S3_REGION', 'ap-northeast-2')
+let AWS_S3_REGION = getEnvVar('VITE_AWS_S3_REGION', 'ap-northeast-2')
+
+// Region 값 최종 정리 (모든 공백, 줄바꿈, 특수문자 제거)
+AWS_S3_REGION = AWS_S3_REGION.replace(/[\s\n\r\t\0\x0B]+/g, '').trim()
 
 // 디버깅용 로그
 console.log('AWS Config:', {
@@ -20,6 +23,8 @@ console.log('AWS Config:', {
   region: `"${AWS_S3_REGION}"`,
   regionLength: AWS_S3_REGION.length,
   regionChars: AWS_S3_REGION.split('').map(c => `'${c}'`).join(''),
+  rawEnvRegion: import.meta.env.VITE_AWS_S3_REGION,
+  rawEnvRegionLength: import.meta.env.VITE_AWS_S3_REGION?.length,
   hasAccessKey: !!AWS_ACCESS_KEY_ID,
   hasSecretKey: !!AWS_SECRET_ACCESS_KEY,
   accessKeyLength: AWS_ACCESS_KEY_ID.length,
@@ -34,12 +39,12 @@ if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY) {
   })
 }
 
-// S3 클라이언트 생성
+// S3 클라이언트 생성 (region을 한 번 더 정리)
 const s3Client = new S3Client({
-  region: AWS_S3_REGION,
+  region: AWS_S3_REGION.replace(/[\s\n\r\t\0\x0B]+/g, '').trim(),
   credentials: AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY ? {
-    accessKeyId: AWS_ACCESS_KEY_ID,
-    secretAccessKey: AWS_SECRET_ACCESS_KEY,
+    accessKeyId: AWS_ACCESS_KEY_ID.replace(/[\s\n\r\t\0\x0B]+/g, '').trim(),
+    secretAccessKey: AWS_SECRET_ACCESS_KEY.replace(/[\s\n\r\t\0\x0B]+/g, '').trim(),
   } : undefined,
 })
 
