@@ -4,8 +4,9 @@ import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand }
 const getEnvVar = (key, defaultValue = '') => {
   const value = import.meta.env[key]
   if (!value) return defaultValue
-  // 모든 공백, 줄바꿈, 탭 제거
-  return String(value).trim().replace(/\s+/g, '')
+  // 모든 공백, 줄바꿈, 탭, 특수문자 제거 후 trim
+  const cleaned = String(value).replace(/[\s\n\r\t]+/g, '').trim()
+  return cleaned || defaultValue
 }
 
 const S3_BUCKET_NAME = getEnvVar('VITE_S3_BUCKET_NAME', 'funpik-development-media')
