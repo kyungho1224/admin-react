@@ -8,8 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy:dev": "./scripts/deploy.sh dev",
-    "deploy:prod": "./scripts/deploy.sh prod"
+    "deploy": "./scripts/deploy.sh",
+    "deploy:prod": "./scripts/deploy.sh --prod"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",

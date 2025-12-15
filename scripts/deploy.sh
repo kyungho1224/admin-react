@@ -1,40 +1,38 @@
 #!/bin/bash
 
 # 배포 스크립트
-# 사용법: ./scripts/deploy.sh [dev|prod] [--skip-git]
+# 사용법: ./scripts/deploy.sh [--skip-git] [--prod]
+# 
+# 참고: 환경(개발/운영)은 사이트 헤더에서 직접 변경할 수 있습니다.
+# 이 스크립트는 단순히 Git push와 Vercel 배포만 수행합니다.
 
 set -e
 
-ENV=${1:-dev}
-SKIP_GIT=${2:-""}
+SKIP_GIT=false
+PROD_DEPLOY=false
 
-if [ "$ENV" != "dev" ] && [ "$ENV" != "prod" ]; then
-  echo "❌ 잘못된 환경입니다. 'dev' 또는 'prod'를 선택하세요."
-  echo "사용법: ./scripts/deploy.sh [dev|prod] [--skip-git]"
-  exit 1
-fi
+# 옵션 파싱
+for arg in "$@"; do
+  case $arg in
+    --skip-git)
+      SKIP_GIT=true
+      shift
+      ;;
+    --prod)
+      PROD_DEPLOY=true
+      shift
+      ;;
+    *)
+      echo "⚠️  알 수 없는 옵션: $arg"
+      ;;
+  esac
+done
 
-echo "🚀 배포 환경: $ENV"
+echo "🚀 배포 시작"
+echo "ℹ️  환경(개발/운영)은 배포 후 사이트 헤더에서 변경할 수 있습니다."
 
-# 1. 환경 변수 설정 (Git 푸시 전에 설정해야 자동 배포 시 올바른 환경 사용)
-if [ "$ENV" = "prod" ]; then
-  echo "🔧 Production 환경 변수 설정 중..."
-  printf "production" | npx vercel env rm VITE_API_ENV production --yes 2>/dev/null || true
-  printf "production" | npx vercel env add VITE_API_ENV production
-  echo "✅ Production 환경 변수 설정 완료"
-else
-  echo "🔧 Development 환경 변수 설정 중..."
-  # Preview 환경 변수 설정
-  printf "development" | npx vercel env rm VITE_API_ENV preview --yes 2>/dev/null || true
-  printf "development" | npx vercel env add VITE_API_ENV preview
-  # Production 환경 변수도 development로 설정 (main 브랜치 푸시 시 사용)
-  printf "development" | npx vercel env rm VITE_API_ENV production --yes 2>/dev/null || true
-  printf "development" | npx vercel env add VITE_API_ENV production
-  echo "✅ Development 환경 변수 설정 완료 (Preview + Production 모두 설정)"
-fi
-
-# 2. Git 변경사항 확인 및 푸시
-if [ "$SKIP_GIT" != "--skip-git" ]; then
+# Git 변경사항 확인 및 푸시
+if [ "$SKIP_GIT" = false ]; then
   if [ -n "$(git status --porcelain)" ]; then
     echo "📝 Git 변경사항이 있습니다."
     read -p "커밋 후 푸시하시겠습니까? (Y/n): " push_confirm
@@ -43,7 +41,7 @@ if [ "$SKIP_GIT" != "--skip-git" ]; then
       read -p "커밋 메시지를 입력하세요 (Enter: 자동 생성): " commit_msg
       
       if [ -z "$commit_msg" ]; then
-        commit_msg="chore: $ENV 환경으로 배포"
+        commit_msg="chore: 배포"
       fi
       
       git add .
@@ -61,8 +59,8 @@ if [ "$SKIP_GIT" != "--skip-git" ]; then
       else
         echo "✅ Git 푸시 완료"
         echo "ℹ️  Vercel이 자동으로 배포를 시작합니다."
-        echo "💡 환경 변수가 적용되도록 CLI로 재배포합니다..."
-        # Git 푸시 후에도 CLI로 재배포하여 환경 변수 적용 보장
+        echo "💡 배포가 완료되면 사이트 헤더에서 환경을 변경할 수 있습니다."
+        exit 0
       fi
     else
       echo "ℹ️  Git 푸시를 건너뜁니다. CLI로만 배포합니다."
@@ -74,14 +72,15 @@ else
   echo "ℹ️  Git 푸시를 건너뜁니다. (--skip-git 옵션)"
 fi
 
-# 3. Vercel CLI로 직접 배포 (Git 푸시가 없거나 실패한 경우)
-if [ "$ENV" = "prod" ]; then
+# Vercel CLI로 직접 배포 (Git 푸시가 없거나 실패한 경우)
+if [ "$PROD_DEPLOY" = true ]; then
   echo "🚀 Production 배포 시작 (CLI)..."
   npx vercel --prod --yes
 else
-  echo "🚀 Development 배포 시작 (CLI)..."
+  echo "🚀 Preview 배포 시작 (CLI)..."
   npx vercel --yes
 fi
 
 echo "✅ 배포 완료!"
+echo "💡 배포 후 사이트 헤더에서 환경(개발/운영)을 변경할 수 있습니다."
 

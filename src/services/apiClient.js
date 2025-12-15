@@ -23,11 +23,21 @@ const PROD_HOST = 'https://production.baseapi.funpik.net'
 /**
  * 현재 환경 확인
  * 환경 변수 우선순위:
- * 1. VITE_USE_PRODUCTION (true/false)
- * 2. VITE_API_ENV (development/production)
- * 3. 기본값: development
+ * 1. localStorage의 사용자 선택 환경 (runtime)
+ * 2. VITE_USE_PRODUCTION (true/false)
+ * 3. VITE_API_ENV (development/production)
+ * 4. 기본값: development
  */
 function getUseProduction() {
+  // localStorage에서 사용자 선택 환경 확인 (런타임 변경 가능)
+  try {
+    const userSelectedEnv = localStorage.getItem('api_environment')
+    if (userSelectedEnv === 'production') return true
+    if (userSelectedEnv === 'development') return false
+  } catch {
+    // localStorage 접근 불가 시 무시
+  }
+
   const useProd = import.meta.env.VITE_USE_PRODUCTION
   const apiEnv = import.meta.env.VITE_API_ENV
 
@@ -40,8 +50,29 @@ function getUseProduction() {
   return false
 }
 
-const useProduction = getUseProduction()
-const currentHost = useProduction ? PROD_HOST : DEV_HOST
+/**
+ * 환경 설정 함수 (런타임 변경)
+ * @param {string} env - 'development' | 'production'
+ */
+export function setApiEnvironment(env) {
+  try {
+    if (env === 'production' || env === 'development') {
+      localStorage.setItem('api_environment', env)
+      // 환경 변경 시 페이지 리로드하여 모든 API 클라이언트에 적용
+      window.location.reload()
+    }
+  } catch (e) {
+    console.error('환경 설정 실패:', e)
+  }
+}
+
+/**
+ * 현재 호스트 반환 (런타임 환경 확인)
+ */
+function getCurrentHost() {
+  const useProd = getUseProduction()
+  return useProd ? PROD_HOST : DEV_HOST
+}
 
 /**
  * 서비스의 베이스 URL 생성
@@ -49,7 +80,8 @@ const currentHost = useProduction ? PROD_HOST : DEV_HOST
  * @returns {string} 서비스 베이스 URL (예: https://dev.baseapi.funpik.net:9007)
  */
 export function getServiceBaseUrl(port) {
-  return `${currentHost}:${port}`
+  const host = getCurrentHost()
+  return `${host}:${port}`
 }
 
 /**
@@ -68,10 +100,12 @@ export function getServiceUrl(port, path) {
  * 현재 환경 정보 반환
  */
 export function getApiConfig() {
+  const useProd = getUseProduction()
+  const host = getCurrentHost()
   return {
-    environment: useProduction ? 'production' : 'development',
-    host: currentHost,
-    useProduction,
+    environment: useProd ? 'production' : 'development',
+    host,
+    useProduction: useProd,
   }
 }
 
