@@ -1,16 +1,46 @@
-import { Link } from 'react-router-dom'
-import { Form, Input, Button, Card, Typography, Space } from 'antd'
-import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons'
+import { Link, useNavigate } from 'react-router-dom'
+import { Form, Input, Button, Card, Typography, Space, message } from 'antd'
+import { UserOutlined, LockOutlined } from '@ant-design/icons'
+import { useState } from 'react'
+import { signup as signupAPI } from '../services/api'
 import './Signup.css'
 
 const { Title } = Typography
 
 function Signup() {
   const [form] = Form.useForm()
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
-  const handleSignup = (values) => {
-    // TODO: 백엔드 API 연동 시 구현
-    console.log('회원가입 시도:', values)
+  const handleSignup = async (values) => {
+    const { username, password } = values
+    
+    if (!username || !password) {
+      message.warning('아이디와 비밀번호를 모두 입력해주세요.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      await signupAPI(username, password)
+      message.success('회원가입이 완료되었습니다. 관리자 승인 후 이용 가능합니다.')
+      form.resetFields()
+      // 회원가입 성공 후 로그인 페이지로 이동
+      setTimeout(() => {
+        navigate('/login')
+      }, 1500)
+    } catch (error) {
+      console.error('회원가입 실패:', error)
+      const errorMessage = error.message || '회원가입에 실패했습니다.'
+      
+      if (errorMessage.includes('이미 존재') || errorMessage.includes('중복')) {
+        message.warning('이미 존재하는 아이디입니다. 다른 아이디를 사용해주세요.')
+      } else {
+        message.error(errorMessage)
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -18,7 +48,7 @@ function Signup() {
       <Card className="signup-card">
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
           <Title level={2} style={{ textAlign: 'center', marginBottom: 0 }}>
-            회원가입
+            📝 회원가입
           </Title>
           <Form
             form={form}
@@ -29,26 +59,17 @@ function Signup() {
             requiredMark={false}
           >
             <Form.Item
-              name="name"
-              label="이름"
-              rules={[{ required: true, message: '이름을 입력해주세요' }]}
-            >
-              <Input
-                prefix={<UserOutlined />}
-                placeholder="이름을 입력하세요"
-              />
-            </Form.Item>
-            <Form.Item
-              name="email"
-              label="이메일"
+              name="username"
+              label="아이디"
               rules={[
-                { required: true, message: '이메일을 입력해주세요' },
-                { type: 'email', message: '올바른 이메일 형식이 아닙니다' },
+                { required: true, message: '아이디를 입력해주세요' },
+                { min: 3, message: '아이디는 최소 3자 이상이어야 합니다' },
               ]}
             >
               <Input
-                prefix={<MailOutlined />}
-                placeholder="이메일을 입력하세요"
+                prefix={<UserOutlined />}
+                placeholder="아이디를 입력하세요"
+                autoComplete="username"
               />
             </Form.Item>
             <Form.Item
@@ -62,6 +83,7 @@ function Signup() {
               <Input.Password
                 prefix={<LockOutlined />}
                 placeholder="비밀번호를 입력하세요"
+                autoComplete="new-password"
               />
             </Form.Item>
             <Form.Item
@@ -83,10 +105,11 @@ function Signup() {
               <Input.Password
                 prefix={<LockOutlined />}
                 placeholder="비밀번호를 다시 입력하세요"
+                autoComplete="new-password"
               />
             </Form.Item>
             <Form.Item>
-              <Button type="primary" htmlType="submit" block>
+              <Button type="primary" htmlType="submit" block loading={loading}>
                 회원가입
               </Button>
             </Form.Item>

@@ -20,7 +20,7 @@ const menuItems = [
   {
     key: '/images',
     icon: <PictureOutlined />,
-    label: '이미지 관리',
+    label: '팝업 이미지 관리',
   },
   // 향후 메뉴 추가 가능
   // {

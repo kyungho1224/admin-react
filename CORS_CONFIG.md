@@ -46,3 +46,5 @@
 - 프로덕션 환경에서는 특정 도메인만 허용하도록 수정하세요.
   예: `["https://yourdomain.com", "http://localhost:3001"]`
 
+
+

@@ -15,13 +15,15 @@ function App() {
     <ConfigProvider locale={koKR}>
       <Router>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+          {/* 임시: 인증 없이 대시보드 바로 접근 가능 */}
           <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path="/popup" element={<PopupManagement />} />
             <Route path="/images" element={<ImageManagement />} />
           </Route>
+          {/* 로그인/회원가입 페이지는 나중에 사용 예정 */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>

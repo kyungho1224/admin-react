@@ -74,7 +74,7 @@ function ImageManagement() {
     <div className="image-management">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <Title level={2} style={{ margin: 0 }}>
-          이미지 관리
+          팝업 이미지 관리 (1080x1350)
         </Title>
         <Space>
           <Button icon={<ReloadOutlined />} onClick={fetchImages} loading={loading}>
