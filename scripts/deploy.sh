@@ -16,7 +16,7 @@ fi
 
 echo "🚀 배포 환경: $ENV"
 
-# 1. 환경 변수 먼저 설정 (Git 푸시 전에 설정해야 자동 배포 시 올바른 환경 사용)
+# 1. 환경 변수 설정 (Git 푸시 전에 설정해야 자동 배포 시 올바른 환경 사용)
 if [ "$ENV" = "prod" ]; then
   echo "🔧 Production 환경 변수 설정 중..."
   printf "production" | npx vercel env rm VITE_API_ENV production --yes 2>/dev/null || true
@@ -24,9 +24,13 @@ if [ "$ENV" = "prod" ]; then
   echo "✅ Production 환경 변수 설정 완료"
 else
   echo "🔧 Development 환경 변수 설정 중..."
+  # Preview 환경 변수 설정
   printf "development" | npx vercel env rm VITE_API_ENV preview --yes 2>/dev/null || true
   printf "development" | npx vercel env add VITE_API_ENV preview
-  echo "✅ Development 환경 변수 설정 완료"
+  # Production 환경 변수도 development로 설정 (main 브랜치 푸시 시 사용)
+  printf "development" | npx vercel env rm VITE_API_ENV production --yes 2>/dev/null || true
+  printf "development" | npx vercel env add VITE_API_ENV production
+  echo "✅ Development 환경 변수 설정 완료 (Preview + Production 모두 설정)"
 fi
 
 # 2. Git 변경사항 확인 및 푸시
@@ -55,9 +59,10 @@ if [ "$SKIP_GIT" != "--skip-git" ]; then
           exit 1
         fi
       else
-        echo "✅ Git 푸시 완료 (자동 배포 시작됨)"
-        echo "ℹ️  Vercel이 자동으로 배포를 시작합니다. CLI 배포는 건너뜁니다."
-        exit 0
+        echo "✅ Git 푸시 완료"
+        echo "ℹ️  Vercel이 자동으로 배포를 시작합니다."
+        echo "💡 환경 변수가 적용되도록 CLI로 재배포합니다..."
+        # Git 푸시 후에도 CLI로 재배포하여 환경 변수 적용 보장
       fi
     else
       echo "ℹ️  Git 푸시를 건너뜁니다. CLI로만 배포합니다."
