@@ -535,41 +535,58 @@ function PopupManagement() {
                       label="이미지"
                       rules={[{ required: true, message: '이미지를 선택해주세요' }]}
                     >
-                      <div>
-                        {form.getFieldValue(['slides', field.name, 'image_url']) ? (
-                          <div style={{ marginBottom: 8 }}>
-                            <Image
-                              src={form.getFieldValue(['slides', field.name, 'image_url'])}
-                              alt="선택된 이미지"
-                              width={200}
-                              height={200}
-                              style={{ objectFit: 'cover', borderRadius: 4 }}
-                            />
-                            <div style={{ marginTop: 8 }}>
-                              <Button
-                                type="link"
-                                onClick={() => {
-                                  form.setFieldValue(['slides', field.name, 'image_url'], undefined)
-                                }}
-                              >
-                                이미지 제거
-                              </Button>
+                      <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => {
+                        const prevImage = prevValues?.slides?.[field.name]?.image_url
+                        const currentImage = currentValues?.slides?.[field.name]?.image_url
+                        return prevImage !== currentImage
+                      }}>
+                        {() => {
+                          const imageUrl = form.getFieldValue(['slides', field.name, 'image_url'])
+                          return (
+                            <div>
+                              {imageUrl ? (
+                                <div style={{ marginBottom: 8 }}>
+                                  <Image
+                                    src={imageUrl}
+                                    alt="선택된 이미지"
+                                    width={200}
+                                    height={200}
+                                    style={{ objectFit: 'cover', borderRadius: 4 }}
+                                  />
+                                  <div style={{ marginTop: 8 }}>
+                                    <Button
+                                      type="link"
+                                      danger
+                                      onClick={() => {
+                                        const currentSlides = form.getFieldValue('slides') || []
+                                        const updatedSlides = currentSlides.map((slide, idx) => 
+                                          idx === field.name ? { ...slide, image_url: null } : slide
+                                        )
+                                        form.setFieldsValue({ slides: updatedSlides })
+                                        form.validateFields([['slides', field.name, 'image_url']])
+                                      }}
+                                    >
+                                      이미지 제거
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <Button
+                                  type="dashed"
+                                  icon={<PictureOutlined />}
+                                  onClick={() => openImageSelectModal(field.name)}
+                                  style={{ width: '100%', height: 200 }}
+                                >
+                                  이미지 선택
+                                </Button>
+                              )}
+                              <div style={{ marginTop: 8, fontSize: '12px', color: '#8c8c8c' }}>
+                                이미지 관리에서 업로드된 이미지를 선택할 수 있습니다.
+                              </div>
                             </div>
-                          </div>
-                        ) : (
-                          <Button
-                            type="dashed"
-                            icon={<PictureOutlined />}
-                            onClick={() => openImageSelectModal(field.name)}
-                            style={{ width: '100%', height: 200 }}
-                          >
-                            이미지 선택
-                          </Button>
-                        )}
-                        <div style={{ marginTop: 8, fontSize: '12px', color: '#8c8c8c' }}>
-                          이미지 관리에서 업로드된 이미지를 선택할 수 있습니다.
-                        </div>
-                      </div>
+                          )
+                        }}
+                      </Form.Item>
                     </Form.Item>
                     <Form.Item
                       {...field}
@@ -756,41 +773,58 @@ function PopupManagement() {
                       label="이미지"
                       rules={[{ required: true, message: '이미지를 선택해주세요' }]}
                     >
-                      <div>
-                        {editForm.getFieldValue(['slides', field.name, 'image_url']) ? (
-                          <div style={{ marginBottom: 8 }}>
-                            <Image
-                              src={editForm.getFieldValue(['slides', field.name, 'image_url'])}
-                              alt="선택된 이미지"
-                              width={200}
-                              height={200}
-                              style={{ objectFit: 'cover', borderRadius: 4 }}
-                            />
-                            <div style={{ marginTop: 8 }}>
-                              <Button
-                                type="link"
-                                onClick={() => {
-                                  editForm.setFieldValue(['slides', field.name, 'image_url'], undefined)
-                                }}
-                              >
-                                이미지 제거
-                              </Button>
+                      <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => {
+                        const prevImage = prevValues?.slides?.[field.name]?.image_url
+                        const currentImage = currentValues?.slides?.[field.name]?.image_url
+                        return prevImage !== currentImage
+                      }}>
+                        {() => {
+                          const imageUrl = editForm.getFieldValue(['slides', field.name, 'image_url'])
+                          return (
+                            <div>
+                              {imageUrl ? (
+                                <div style={{ marginBottom: 8 }}>
+                                  <Image
+                                    src={imageUrl}
+                                    alt="선택된 이미지"
+                                    width={200}
+                                    height={200}
+                                    style={{ objectFit: 'cover', borderRadius: 4 }}
+                                  />
+                                  <div style={{ marginTop: 8 }}>
+                                    <Button
+                                      type="link"
+                                      danger
+                                      onClick={() => {
+                                        const currentSlides = editForm.getFieldValue('slides') || []
+                                        const updatedSlides = currentSlides.map((slide, idx) => 
+                                          idx === field.name ? { ...slide, image_url: null } : slide
+                                        )
+                                        editForm.setFieldsValue({ slides: updatedSlides })
+                                        editForm.validateFields([['slides', field.name, 'image_url']])
+                                      }}
+                                    >
+                                      이미지 제거
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <Button
+                                  type="dashed"
+                                  icon={<PictureOutlined />}
+                                  onClick={() => openImageSelectModal(field.name)}
+                                  style={{ width: '100%', height: 200 }}
+                                >
+                                  이미지 선택
+                                </Button>
+                              )}
+                              <div style={{ marginTop: 8, fontSize: '12px', color: '#8c8c8c' }}>
+                                이미지 관리에서 업로드된 이미지를 선택할 수 있습니다.
+                              </div>
                             </div>
-                          </div>
-                        ) : (
-                          <Button
-                            type="dashed"
-                            icon={<PictureOutlined />}
-                            onClick={() => openImageSelectModal(field.name)}
-                            style={{ width: '100%', height: 200 }}
-                          >
-                            이미지 선택
-                          </Button>
-                        )}
-                        <div style={{ marginTop: 8, fontSize: '12px', color: '#8c8c8c' }}>
-                          이미지 관리에서 업로드된 이미지를 선택할 수 있습니다.
-                        </div>
-                      </div>
+                          )
+                        }}
+                      </Form.Item>
                     </Form.Item>
                     <Form.Item
                       {...field}
