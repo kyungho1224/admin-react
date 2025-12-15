@@ -1,20 +1,48 @@
-import { Layout, Typography, Space, Avatar, Select, Tag } from 'antd'
-import { UserOutlined } from '@ant-design/icons'
+import { Layout, Typography, Space, Avatar, Select, Tag, Button, Modal } from 'antd'
+import { UserOutlined, LogoutOutlined, ClockCircleOutlined } from '@ant-design/icons'
 import { getApiConfig, setApiEnvironment } from '../../services/apiClient'
+import { useAuth } from '../../contexts/AuthContext'
+import { useNavigate } from 'react-router-dom'
 import './Header.css'
 
 const { Header: AntHeader } = Layout
 const { Title } = Typography
 const { Option } = Select
+const { confirm } = Modal
 
 function Header() {
   const apiConfig = getApiConfig()
   const currentEnv = apiConfig.environment
+  const { user, logout, sessionTimeLeft, canExtend, extendSession } = useAuth()
+  const navigate = useNavigate()
+
+  // 세션 시간 포맷팅 (분:초)
+  const formatSessionTime = (seconds) => {
+    if (!seconds || seconds <= 0) return '만료됨'
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
 
   const handleEnvironmentChange = (value) => {
     if (value !== currentEnv) {
-      setApiEnvironment(value)
+      confirm({
+        title: '환경 변경',
+        content: '환경을 변경하면 다시 로그인해야 합니다. 계속하시겠습니까?',
+        okText: '확인',
+        cancelText: '취소',
+        onOk() {
+          logout()
+          setApiEnvironment(value)
+          navigate('/login')
+        },
+      })
     }
+  }
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
   }
 
   return (
@@ -50,8 +78,34 @@ function Header() {
             {currentEnv === 'production' ? '운영' : '개발'}
           </Tag>
         </Space>
+        {sessionTimeLeft !== null && (
+          <Space size="small">
+            <ClockCircleOutlined />
+            <span style={{ fontSize: '12px', color: canExtend ? '#ff4d4f' : '#8c8c8c' }}>
+              {formatSessionTime(sessionTimeLeft)}
+            </span>
+            {canExtend && (
+              <Button
+                type="link"
+                size="small"
+                onClick={extendSession}
+                style={{ padding: 0, height: 'auto' }}
+              >
+                연장
+              </Button>
+            )}
+          </Space>
+        )}
         <Avatar icon={<UserOutlined />} />
-        <span>관리자</span>
+        <span>{user?.username || '관리자'}</span>
+        <Button
+          type="text"
+          icon={<LogoutOutlined />}
+          onClick={handleLogout}
+          size="small"
+        >
+          로그아웃
+        </Button>
       </Space>
     </AntHeader>
   )

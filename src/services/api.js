@@ -1,4 +1,3 @@
-import { hashPassword } from '../utils/auth'
 import { getServiceUrl, ServicePort } from './apiClient'
 
 /**
@@ -9,32 +8,96 @@ async function handleResponse(response) {
   if (data.result && data.result.code === 200) {
     return data.result.body
   }
-  throw new Error(data.result?.message || 'API 요청 실패')
+  // HTTPException의 경우 detail 필드 사용
+  throw new Error(data.detail || data.result?.message || 'API 요청 실패')
+}
+
+/**
+ * 인증 헤더 가져오기
+ */
+function getAuthHeaders() {
+  const token = localStorage.getItem('access_token')
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { 'Authorization': `Bearer ${token}` }),
+  }
 }
 
 /**
  * 로그인
  * @param {string} username - 사용자 아이디
- * @param {string} password - 비밀번호 (해싱 전)
+ * @param {string} password - 원본 비밀번호 (백엔드에서 해싱)
  */
 export async function login(username, password) {
-  // Streamlit 코드와 동일하게 클라이언트에서 SHA256 해싱
-  const hashedPassword = hashPassword(password)
+  // 백엔드에서 해싱하므로 원본 비밀번호 전송
+  const url = getServiceUrl(ServicePort.NOTIFICATION, '/v3/auth/login')
   
-  const response = await fetch(getServiceUrl(ServicePort.NOTIFICATION, '/v3/auth/login'), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username,
+        password, // 원본 비밀번호 전송
+      }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      console.error('[Login API] 에러 응답:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData,
+      })
+      // HTTPException의 경우 detail 필드 사용
+      throw new Error(errorData.detail || errorData.result?.message || errorData.message || '로그인 실패')
+    }
+
+    return handleResponse(response)
+  } catch (error) {
+    console.error('[Login API] 요청 실패:', {
+      url,
       username,
-      password: hashedPassword, // 해싱된 비밀번호 전송
-    }),
+      error: error.message,
+      stack: error.stack,
+    })
+    throw error
+  }
+}
+
+/**
+ * 토큰 갱신
+ */
+export async function refreshToken() {
+  const response = await fetch(getServiceUrl(ServicePort.NOTIFICATION, '/v3/auth/refresh'), {
+    method: 'POST',
+    headers: getAuthHeaders(),
   })
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}))
-    throw new Error(errorData.result?.message || errorData.message || '로그인 실패')
+    // HTTPException의 경우 detail 필드 사용
+    throw new Error(errorData.detail || errorData.result?.message || errorData.message || '토큰 갱신 실패')
+  }
+
+  return handleResponse(response)
+}
+
+/**
+ * 토큰 검증
+ */
+export async function verifyToken() {
+  const response = await fetch(getServiceUrl(ServicePort.NOTIFICATION, '/v3/auth/verify'), {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    // HTTPException의 경우 detail 필드 사용
+    throw new Error(errorData.detail || errorData.result?.message || errorData.message || '토큰 검증 실패')
   }
 
   return handleResponse(response)
@@ -43,12 +106,10 @@ export async function login(username, password) {
 /**
  * 회원가입
  * @param {string} username - 사용자 아이디
- * @param {string} password - 비밀번호 (해싱 전)
+ * @param {string} password - 원본 비밀번호 (백엔드에서 해싱)
  */
 export async function signup(username, password) {
-  // Streamlit 코드와 동일하게 클라이언트에서 SHA256 해싱
-  const hashedPassword = hashPassword(password)
-  
+  // 백엔드에서 해싱하므로 원본 비밀번호 전송
   const response = await fetch(getServiceUrl(ServicePort.NOTIFICATION, '/v3/auth/signup'), {
     method: 'POST',
     headers: {
@@ -56,13 +117,14 @@ export async function signup(username, password) {
     },
     body: JSON.stringify({
       username,
-      password: hashedPassword, // 해싱된 비밀번호 전송
+      password, // 원본 비밀번호 전송
     }),
   })
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}))
-    throw new Error(errorData.result?.message || errorData.message || '회원가입 실패')
+    // HTTPException의 경우 detail 필드 사용
+    throw new Error(errorData.detail || errorData.result?.message || errorData.message || '회원가입 실패')
   }
 
   return handleResponse(response)
@@ -73,7 +135,16 @@ export async function signup(username, password) {
  * @param {string} screen - 화면 키 (예: 'ranking', 'home' 등)
  */
 export async function getPopupsByScreen(screen) {
-  const response = await fetch(getServiceUrl(ServicePort.NOTIFICATION, `/v3/popups?screen=${screen}`))
+  const response = await fetch(getServiceUrl(ServicePort.NOTIFICATION, `/v3/popups?screen=${screen}`), {
+    headers: getAuthHeaders(),
+  })
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    // HTTPException의 경우 detail 필드 사용
+    throw new Error(errorData.detail || errorData.result?.message || errorData.message || `HTTP error! status: ${response.status}`)
+  }
+  
   return handleResponse(response)
 }
 
@@ -84,15 +155,14 @@ export async function getPopupsByScreen(screen) {
 export async function createPopup(popupData) {
   const response = await fetch(getServiceUrl(ServicePort.NOTIFICATION, '/v3/popups'), {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(popupData),
   })
   
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}))
-    throw new Error(errorData.result?.message || `HTTP error! status: ${response.status}`)
+    // HTTPException의 경우 detail 필드 사용
+    throw new Error(errorData.detail || errorData.result?.message || errorData.message || `HTTP error! status: ${response.status}`)
   }
   
   return handleResponse(response)
@@ -116,16 +186,15 @@ export async function updatePopup(popupId, updateData) {
     getServiceUrl(ServicePort.NOTIFICATION, `/v3/popups/${popupId}`),
     {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(updateData),
     }
   )
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}))
-    throw new Error(errorData.result?.message || `HTTP error! status: ${response.status}`)
+    // HTTPException의 경우 detail 필드 사용
+    throw new Error(errorData.detail || errorData.result?.message || errorData.message || `HTTP error! status: ${response.status}`)
   }
 
   return handleResponse(response)
@@ -142,14 +211,35 @@ export async function deletePopup(popupId, screenKey = null) {
   
   const response = await fetch(`${url}${queryParams}`, {
     method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getAuthHeaders(),
   })
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}))
-    throw new Error(errorData.result?.message || `HTTP error! status: ${response.status}`)
+    // HTTPException의 경우 detail 필드 사용
+    throw new Error(errorData.detail || errorData.result?.message || errorData.message || `HTTP error! status: ${response.status}`)
+  }
+
+  return handleResponse(response)
+}
+
+/**
+ * GA 이벤트 통계 조회
+ * @param {string} date - 조회할 날짜 (YYYY-MM-DD)
+ */
+export async function getGAEvents(date) {
+  const response = await fetch(
+    getServiceUrl(ServicePort.NOTIFICATION, `/v3/analytics/ga-events?date=${date}`),
+    {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    }
+  )
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    // HTTPException의 경우 detail 필드 사용
+    throw new Error(errorData.detail || errorData.result?.message || errorData.message || `HTTP error! status: ${response.status}`)
   }
 
   return handleResponse(response)

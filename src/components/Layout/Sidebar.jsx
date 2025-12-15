@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu } from 'antd'
-import { DashboardOutlined, NotificationOutlined, PictureOutlined } from '@ant-design/icons'
+import { DashboardOutlined, NotificationOutlined, PictureOutlined, BarChartOutlined } from '@ant-design/icons'
 import './Sidebar.css'
 
 const { Sider } = Layout
@@ -21,6 +21,11 @@ const menuItems = [
     key: '/images',
     icon: <PictureOutlined />,
     label: '팝업 이미지 관리',
+  },
+  {
+    key: '/ga-events',
+    icon: <BarChartOutlined />,
+    label: 'GA 이벤트 조회',
   },
   // 향후 메뉴 추가 가능
   // {

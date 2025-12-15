@@ -20,13 +20,14 @@ function Login() {
       const { username, password } = values
       const response = await loginAPI(username, password)
       
-      // 응답에서 사용자 정보 추출 (백엔드 응답 구조에 맞게 조정 필요)
-      const userData = {
-        username,
-        ...response.user, // 백엔드에서 반환하는 사용자 정보
+      // 응답에서 토큰과 사용자 정보 추출
+      const { access_token, user: userData } = response
+      
+      if (!access_token || !userData) {
+        throw new Error('로그인 응답 형식이 올바르지 않습니다.')
       }
       
-      setAuthUser(userData)
+      setAuthUser(userData, access_token)
       message.success('로그인 성공!')
       navigate('/')
     } catch (error) {
