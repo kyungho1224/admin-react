@@ -8,6 +8,7 @@ import Signup from './pages/Signup'
 import PopupManagement from './pages/PopupManagement'
 import ImageManagement from './pages/ImageManagement'
 import GAEventManagement from './pages/GAEventManagement'
+import GameManagement from './pages/GameManagement'
 import './App.css'
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
             <Route path="popup" element={<PopupManagement />} />
             <Route path="images" element={<ImageManagement />} />
             <Route path="ga-events" element={<GAEventManagement />} />
+            <Route path="games" element={<GameManagement />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

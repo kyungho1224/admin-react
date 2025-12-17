@@ -245,3 +245,56 @@ export async function getGAEvents(date) {
   return handleResponse(response)
 }
 
+/**
+ * 게임 규칙 조회
+ */
+export async function getGameRules() {
+  const response = await fetch(
+    getServiceUrl(ServicePort.NOTIFICATION, '/v3/games/rules'),
+    {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    }
+  )
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(
+      errorData.detail || 
+      errorData.result?.message || 
+      errorData.message || 
+      '게임 규칙 조회 실패'
+    )
+  }
+
+  return handleResponse(response)
+}
+
+/**
+ * 게임 정보 수정
+ * @param {number} gameId - 게임 ID
+ * @param {Object} updateData - 수정할 데이터
+ */
+export async function updateGame(gameId, updateData) {
+  const response = await fetch(
+    getServiceUrl(ServicePort.NOTIFICATION, `/v3/games/${gameId}`),
+    {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(updateData),
+    }
+  )
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(
+      errorData.detail || 
+      errorData.result?.message || 
+      errorData.message || 
+      '게임 정보 수정 실패'
+    )
+  }
+
+  return handleResponse(response)
+}
+

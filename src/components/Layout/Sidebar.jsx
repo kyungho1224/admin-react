@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu } from 'antd'
-import { DashboardOutlined, NotificationOutlined, PictureOutlined, BarChartOutlined } from '@ant-design/icons'
+import { DashboardOutlined, NotificationOutlined, PictureOutlined, BarChartOutlined, PlayCircleOutlined } from '@ant-design/icons'
 import './Sidebar.css'
 
 const { Sider } = Layout
@@ -21,6 +21,11 @@ const menuItems = [
     key: '/images',
     icon: <PictureOutlined />,
     label: '팝업 이미지 관리',
+  },
+  {
+    key: '/games',
+    icon: <PlayCircleOutlined />,
+    label: '게임 관리',
   },
   {
     key: '/ga-events',
