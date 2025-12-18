@@ -125,6 +125,7 @@ class SignupRequest(BaseModel):
     password: str  # 원본 비밀번호 (백엔드에서 SHA256으로 해싱)
 
 # 토큰에서 사용자 정보 추출 (의존성)
+@inject
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     service: AuthService = Depends(Provide[AppModule.auth_service])
@@ -757,6 +758,7 @@ from usecases.v3_auth.auth_service import AuthService
 
 security = HTTPBearer()
 
+@inject
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     service: AuthService = Depends(Provide[AppModule.auth_service])

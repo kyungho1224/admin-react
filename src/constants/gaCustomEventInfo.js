@@ -140,3 +140,5 @@ export const GA_CUSTOM_EVENT_INFO = {
   "click_k_study_abroad_section": ["K-Life 유학 (Welko)", "K-Life"],
 }
 
+
+

@@ -242,3 +242,5 @@ GA_CUSTOM_EVENT_INFO = {
 3. **에러 처리**: BigQuery 쿼리 실패 시 적절한 에러 메시지 반환
 4. **날짜 형식**: ISO 형식 (YYYY-MM-DD) 사용
 
+
+

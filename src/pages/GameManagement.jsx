@@ -351,7 +351,7 @@ function GameManagement() {
                       ]}
                     >
                       <InputNumber 
-                        min={1} 
+                        min={0} 
                         style={{ width: '100%' }} 
                         disabled={isUnlimited}
                         placeholder={isUnlimited ? '무제한 모드' : '일일 가능 횟수'}
