@@ -224,7 +224,7 @@ function GameManagement() {
     <div className="game-management">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <Title level={2} style={{ margin: 0 }}>
-          게임 관리
+          게임 규칙관리
         </Title>
       </div>
       <Card>

@@ -1,9 +1,16 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu } from 'antd'
-import { DashboardOutlined, NotificationOutlined, PictureOutlined, BarChartOutlined, PlayCircleOutlined } from '@ant-design/icons'
+import { DashboardOutlined, NotificationOutlined, PictureOutlined, BarChartOutlined, PlayCircleOutlined, DatabaseOutlined } from '@ant-design/icons'
+import { GAME_TYPES } from '../../constants/gameTypes'
 import './Sidebar.css'
 
 const { Sider } = Layout
+
+// 게임 데이터 관리 하위 메뉴 생성
+const gameDataMenuItems = GAME_TYPES.map(game => ({
+  key: `/game-data/${game.key}`,
+  label: game.label,
+}))
 
 // 확장 가능한 메뉴 구조
 const menuItems = [
@@ -25,7 +32,13 @@ const menuItems = [
   {
     key: '/games',
     icon: <PlayCircleOutlined />,
-    label: '게임 관리',
+    label: '게임 규칙관리',
+  },
+  {
+    key: '/game-data',
+    icon: <DatabaseOutlined />,
+    label: '게임 데이터 관리',
+    children: gameDataMenuItems,
   },
   {
     key: '/ga-events',
