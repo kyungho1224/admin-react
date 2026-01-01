@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
-import { Card, Table, Typography, message, Space, Button, Modal, Form, Input, DatePicker, Select } from 'antd'
+import { useSearchParams } from 'react-router-dom'
+import { Card, Table, Typography, message, Space, Button, Modal, Form, Input, DatePicker, Select, Tabs } from 'antd'
 import { PlusOutlined, ReloadOutlined, DownloadOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { getGameData, createGameData, exportGameData } from '../services/api'
-import { getGameTypeByKey } from '../constants/gameTypes'
+import { GAME_TYPES, getGameTypeByKey } from '../constants/gameTypes'
 import './GameDataManagement.css'
 
 const { Title } = Typography
@@ -13,7 +13,9 @@ const { Option } = Select
 const { TextArea } = Input
 
 function GameDataDetail() {
-  const { gameType } = useParams()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const gameTypeParam = searchParams.get('gameType') || GAME_TYPES[0].key
+  const [selectedGameType, setSelectedGameType] = useState(gameTypeParam)
   const [loading, setLoading] = useState(false)
   const [gameData, setGameData] = useState([])
   const [isAddModalVisible, setIsAddModalVisible] = useState(false)
@@ -21,10 +23,24 @@ function GameDataDetail() {
   const [form] = Form.useForm()
   const [exportForm] = Form.useForm()
 
-  const gameInfo = getGameTypeByKey(gameType)
+  const gameInfo = getGameTypeByKey(selectedGameType)
+
+  // 초기 URL 파라미터 설정 (없으면 기본값으로 설정)
+  useEffect(() => {
+    if (!searchParams.get('gameType')) {
+      setSearchParams({ gameType: GAME_TYPES[0].key }, { replace: true })
+      setSelectedGameType(GAME_TYPES[0].key)
+    }
+  }, [])
+
+  // 게임 타입 변경 시 URL 업데이트
+  const handleGameTypeChange = (key) => {
+    setSelectedGameType(key)
+    setSearchParams({ gameType: key })
+  }
 
   // 게임 데이터 목록 조회
-  const fetchGameData = async () => {
+  const fetchGameData = async (gameType) => {
     if (!gameType) return
     
     setLoading(true)
@@ -32,7 +48,7 @@ function GameDataDetail() {
       // TODO: API 연동
       // const data = await getGameData(gameType)
       // setGameData(data || [])
-      message.info(`${gameInfo?.label || '게임'} 데이터 목록 조회 기능은 준비 중입니다.`)
+      // message.info는 한 번만 표시하도록 제거 (개발 중이므로)
       setGameData([])
     } catch (error) {
       console.error('게임 데이터 조회 실패:', error)
@@ -43,21 +59,28 @@ function GameDataDetail() {
     }
   }
 
+  // URL 파라미터 변경 감지 및 데이터 조회
   useEffect(() => {
-    fetchGameData()
-  }, [gameType])
+    const gameTypeFromUrl = searchParams.get('gameType') || GAME_TYPES[0].key
+    if (gameTypeFromUrl !== selectedGameType) {
+      setSelectedGameType(gameTypeFromUrl)
+    }
+    // 게임 타입에 맞는 데이터 조회
+    fetchGameData(gameTypeFromUrl)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   // 게임 데이터 추가
   const handleAdd = async (values) => {
-    if (!gameType) return
+    if (!selectedGameType) return
 
     try {
       // TODO: API 연동
-      // await createGameData(gameType, values)
+      // await createGameData(selectedGameType, values)
       message.success('게임 데이터가 추가되었습니다.')
       setIsAddModalVisible(false)
       form.resetFields()
-      fetchGameData()
+      fetchGameData(selectedGameType)
     } catch (error) {
       console.error('게임 데이터 추가 실패:', error)
       message.error(error.message || '게임 데이터 추가에 실패했습니다.')
@@ -66,7 +89,7 @@ function GameDataDetail() {
 
   // 게임 데이터 내보내기
   const handleExport = async (values) => {
-    if (!gameType) return
+    if (!selectedGameType) return
 
     try {
       const exportOptions = {
@@ -76,7 +99,7 @@ function GameDataDetail() {
       }
 
       // TODO: API 연동
-      // const result = await exportGameData(gameType, exportOptions)
+      // const result = await exportGameData(selectedGameType, exportOptions)
       // 파일 다운로드 처리
       message.success('게임 데이터 내보내기가 완료되었습니다.')
       setIsExportModalVisible(false)
@@ -148,11 +171,17 @@ function GameDataDetail() {
     },
   ]
 
+  // 탭 아이템 생성
+  const tabItems = GAME_TYPES.map(game => ({
+    key: game.key,
+    label: game.label,
+  }))
+
   return (
     <div className="game-data-management">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <Title level={2} style={{ margin: 0 }}>
-          {gameInfo?.label || '게임'} 데이터 관리
+          게임 데이터 관리
         </Title>
         <Space>
           <Button 
@@ -168,13 +197,19 @@ function GameDataDetail() {
           >
             내보내기
           </Button>
-          <Button icon={<ReloadOutlined />} onClick={fetchGameData} loading={loading}>
+          <Button icon={<ReloadOutlined />} onClick={() => fetchGameData(selectedGameType)} loading={loading}>
             새로고침
           </Button>
         </Space>
       </div>
 
       <Card>
+        <Tabs
+          activeKey={selectedGameType}
+          items={tabItems}
+          onChange={handleGameTypeChange}
+          style={{ marginBottom: 16 }}
+        />
         <Table
           columns={columns}
           dataSource={gameData}

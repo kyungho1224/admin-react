@@ -50,3 +50,4 @@ export function getGameTypeByLabel(label) {
   return GAME_TYPES.find(game => game.label === label) || null
 }
 
+

@@ -7,6 +7,8 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import PopupManagement from './pages/PopupManagement'
 import ImageManagement from './pages/ImageManagement'
+import BannerManagement from './pages/BannerManagement'
+import BannerImageManagement from './pages/BannerImageManagement'
 import GAEventManagement from './pages/GAEventManagement'
 import GameManagement from './pages/GameManagement'
 import GameDataDetail from './pages/GameDataDetail'
@@ -30,9 +32,11 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="popup" element={<PopupManagement />} />
             <Route path="images" element={<ImageManagement />} />
+            <Route path="banner" element={<BannerManagement />} />
+            <Route path="banner/images" element={<BannerImageManagement />} />
             <Route path="ga-events" element={<GAEventManagement />} />
             <Route path="games" element={<GameManagement />} />
-            <Route path="game-data/:gameType" element={<GameDataDetail />} />
+            <Route path="games/data" element={<GameDataDetail />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
