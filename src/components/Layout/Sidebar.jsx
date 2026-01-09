@@ -20,10 +20,10 @@ const menuItems = [
       {
         key: '/popup',
         label: '팝업 목록',
-      },
-      {
-        key: '/images',
-        icon: <PictureOutlined />,
+  },
+  {
+    key: '/images',
+    icon: <PictureOutlined />,
         label: '이미지 관리',
       },
     ],
