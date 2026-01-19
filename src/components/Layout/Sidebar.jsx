@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu } from 'antd'
-import { DashboardOutlined, NotificationOutlined, PictureOutlined, BarChartOutlined, PlayCircleOutlined, DatabaseOutlined, FileImageOutlined } from '@ant-design/icons'
+import { DashboardOutlined, NotificationOutlined, PictureOutlined, BarChartOutlined, PlayCircleOutlined, DatabaseOutlined, FileImageOutlined, LineChartOutlined } from '@ant-design/icons'
 import './Sidebar.css'
 
 const { Sider } = Layout
@@ -64,6 +64,11 @@ const menuItems = [
     key: '/ga-events',
     icon: <BarChartOutlined />,
     label: 'GA 이벤트 조회',
+  },
+  {
+    key: '/onboarding-analytics',
+    icon: <LineChartOutlined />,
+    label: '온보딩 지표 분석',
   },
   // 향후 메뉴 추가 가능
   // {

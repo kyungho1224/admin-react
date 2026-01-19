@@ -1,18 +1,29 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { Form, Input, Button, Card, Typography, Space, message } from 'antd'
+import { Form, Input, Button, Card, Typography, Space, message, Select, Tag } from 'antd'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 import { login as loginAPI } from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
+import { getApiConfig, setApiEnvironment } from '../services/apiClient'
 import './Login.css'
 
 const { Title } = Typography
+const { Option } = Select
 
 function Login() {
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const { login: setAuthUser } = useAuth()
+  const apiConfig = getApiConfig()
+  const [currentEnv, setCurrentEnv] = useState(apiConfig.environment)
+
+  // 환경 변경 핸들러
+  const handleEnvironmentChange = (value) => {
+    setApiEnvironment(value)
+    setCurrentEnv(value)
+    message.success(`환경이 ${value === 'production' ? '운영' : '개발'}으로 변경되었습니다.`)
+  }
 
   const handleLogin = async (values) => {
     setLoading(true)
@@ -45,6 +56,23 @@ function Login() {
           <Title level={2} style={{ textAlign: 'center', marginBottom: 0 }}>
             🔐 로그인
           </Title>
+          <div style={{ textAlign: 'center', marginBottom: 8 }}>
+            <Space size="small">
+              <span style={{ fontSize: '14px', color: '#8c8c8c' }}>환경:</span>
+              <Select
+                value={currentEnv}
+                onChange={handleEnvironmentChange}
+                style={{ width: 100 }}
+                size="small"
+              >
+                <Option value="development">개발</Option>
+                <Option value="production">운영</Option>
+              </Select>
+              <Tag color={currentEnv === 'production' ? 'red' : 'blue'} style={{ margin: 0 }}>
+                {currentEnv === 'production' ? '운영' : '개발'}
+              </Tag>
+            </Space>
+          </div>
           <Form
             form={form}
             name="login"

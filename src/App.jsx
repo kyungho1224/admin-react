@@ -12,6 +12,7 @@ import BannerImageManagement from './pages/BannerImageManagement'
 import GAEventManagement from './pages/GAEventManagement'
 import GameManagement from './pages/GameManagement'
 import GameDataDetail from './pages/GameDataDetail'
+import OnboardingAnalytics from './pages/OnboardingAnalytics'
 import './App.css'
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
             <Route path="banner" element={<BannerManagement />} />
             <Route path="banner/images" element={<BannerImageManagement />} />
             <Route path="ga-events" element={<GAEventManagement />} />
+            <Route path="onboarding-analytics" element={<OnboardingAnalytics />} />
             <Route path="games" element={<GameManagement />} />
             <Route path="games/data" element={<GameDataDetail />} />
           </Route>
