@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu } from 'antd'
-import { DashboardOutlined, NotificationOutlined, PictureOutlined, BarChartOutlined, PlayCircleOutlined, DatabaseOutlined, FileImageOutlined, LineChartOutlined } from '@ant-design/icons'
+import { DashboardOutlined, NotificationOutlined, PictureOutlined, BarChartOutlined, PlayCircleOutlined, DatabaseOutlined, FileImageOutlined, LineChartOutlined, MessageOutlined, GlobalOutlined } from '@ant-design/icons'
 import './Sidebar.css'
 
 const { Sider } = Layout
@@ -60,15 +60,51 @@ const menuItems = [
       },
     ],
   },
-  {
-    key: '/ga-events',
-    icon: <BarChartOutlined />,
-    label: 'GA 이벤트 조회',
-  },
+  // {
+  //   key: '/ga-events',
+  //   icon: <BarChartOutlined />,
+  //   label: 'GA 이벤트 조회',
+  // },
   {
     key: '/onboarding-analytics',
     icon: <LineChartOutlined />,
     label: '온보딩 지표 분석',
+  },
+  {
+    key: '/chat',
+    icon: <MessageOutlined />,
+    label: '채팅 관리',
+  },
+  {
+    key: '/k-life',
+    icon: <GlobalOutlined />,
+    label: 'K-Life',
+    children: [
+      {
+        key: '/k-life/info',
+        label: '정보',
+      },
+      {
+        key: '/k-life/follower-boost',
+        label: 'FollowerBoost',
+      },
+      {
+        key: '/k-life/post-boost',
+        label: 'PostBoost',
+      },
+      {
+        key: '/k-life/meetup',
+        label: '모임',
+      },
+      {
+        key: '/k-life/campaign',
+        label: '캠페인',
+      },
+      {
+        key: '/k-life/study-abroad',
+        label: '어학연수',
+      },
+    ],
   },
   // 향후 메뉴 추가 가능
   // {
@@ -108,6 +144,9 @@ function Sidebar() {
     if (path.startsWith('/games') && !path.startsWith('/games/data')) {
       return ['/games']
     }
+    if (path.startsWith('/k-life')) {
+      return [path]
+    }
     return [path]
   }
 
@@ -123,6 +162,9 @@ function Sidebar() {
     }
     if (path.startsWith('/games')) {
       openKeys.push('/games')
+    }
+    if (path.startsWith('/k-life')) {
+      openKeys.push('/k-life')
     }
     return openKeys
   }

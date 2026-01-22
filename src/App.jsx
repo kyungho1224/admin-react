@@ -13,6 +13,8 @@ import GAEventManagement from './pages/GAEventManagement'
 import GameManagement from './pages/GameManagement'
 import GameDataDetail from './pages/GameDataDetail'
 import OnboardingAnalytics from './pages/OnboardingAnalytics'
+import ChatManagement from './pages/ChatManagement'
+import StudyAbroad from './pages/StudyAbroad'
 import './App.css'
 
 function App() {
@@ -37,6 +39,8 @@ function App() {
             <Route path="banner/images" element={<BannerImageManagement />} />
             <Route path="ga-events" element={<GAEventManagement />} />
             <Route path="onboarding-analytics" element={<OnboardingAnalytics />} />
+            <Route path="chat" element={<ChatManagement />} />
+            <Route path="k-life/study-abroad" element={<StudyAbroad />} />
             <Route path="games" element={<GameManagement />} />
             <Route path="games/data" element={<GameDataDetail />} />
           </Route>
