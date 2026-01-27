@@ -166,6 +166,7 @@ function ImageManagement() {
         footer={null}
         width={800}
         centered
+        className="image-preview-modal"
       >
         {previewImage && (
           <div>

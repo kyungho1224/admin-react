@@ -16,3 +16,65 @@
 .login-card .ant-card-body {
   padding: 40px;
 }
+
+/* 모바일 반응형 */
+@media (max-width: 767px) {
+  .login-page {
+    padding: 16px;
+    align-items: flex-start;
+    padding-top: 20vh;
+  }
+
+  .login-card {
+    max-width: 100%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .login-card .ant-card-body {
+    padding: 24px 20px;
+  }
+
+  .login-card .ant-typography-title {
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+
+  /* 환경 선택 모바일 최적화 */
+  .login-card .ant-space {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .login-card .ant-select {
+    font-size: 16px; /* iOS 줌 방지 */
+  }
+
+  /* 폼 모바일 최적화 */
+  .login-card .ant-form-item {
+    margin-bottom: 20px;
+  }
+
+  .login-card .ant-form-item-label {
+    padding-bottom: 6px;
+  }
+
+  .login-card .ant-form-item-label > label {
+    font-size: 14px;
+  }
+
+  .login-card .ant-input,
+  .login-card .ant-input-password {
+    font-size: 16px; /* iOS 줌 방지 */
+    min-height: 44px;
+  }
+
+  .login-card .ant-btn {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  /* 링크 모바일 최적화 */
+  .login-card a {
+    font-size: 14px;
+  }
+}

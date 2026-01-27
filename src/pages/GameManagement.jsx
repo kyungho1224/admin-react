@@ -253,6 +253,7 @@ function GameManagement() {
         }}
         footer={null}
         width={800}
+        className="game-edit-modal"
       >
         <Form
           form={form}
@@ -260,7 +261,7 @@ function GameManagement() {
           onFinish={handleUpdate}
         >
           <Row gutter={16}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="tag_id"
                 label="학습 수준"
@@ -275,7 +276,7 @@ function GameManagement() {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="title"
                 label="게임 제목"
@@ -300,7 +301,7 @@ function GameManagement() {
           <Title level={5} style={{ marginTop: 24, marginBottom: 16 }}>게임 규칙</Title>
 
           <Row gutter={16}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="init_seconds"
                 label="게임 시작 시간 (초)"
@@ -309,7 +310,7 @@ function GameManagement() {
                 <InputNumber min={0} style={{ width: '100%' }} />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="sec_of_revive"
                 label="부활 시간 (초)"
@@ -321,7 +322,7 @@ function GameManagement() {
           </Row>
 
           <Row gutter={16}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="is_unlimited"
                 label="무제한 가능"
@@ -330,7 +331,7 @@ function GameManagement() {
                 <Switch />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 noStyle
                 shouldUpdate={(prevValues, currentValues) => 
@@ -364,7 +365,7 @@ function GameManagement() {
           </Row>
 
           <Row gutter={16}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="cost_item_amount"
                 label="아이템 필요 수량"
@@ -373,7 +374,7 @@ function GameManagement() {
                 <InputNumber min={0} style={{ width: '100%' }} />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="sec_of_correct_answer"
                 label="정답 시 추가 시간 (초)"
@@ -385,7 +386,7 @@ function GameManagement() {
           </Row>
 
           <Row gutter={16}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="sec_of_penalty"
                 label="오답 시 차감 시간 (초)"
@@ -395,7 +396,7 @@ function GameManagement() {
                 <InputNumber style={{ width: '100%' }} />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="score_per_question"
                 label="문제당 포인트"

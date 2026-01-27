@@ -568,9 +568,9 @@ function ChatManagement() {
 
           {/* 필터 영역 */}
           <Card>
-            <Row gutter={16} align="middle">
-              <Col>
-                <Space>
+            <Row gutter={[16, 8]} align="middle">
+              <Col xs={24} sm={12} md={6}>
+                <Space wrap>
                   <span>조회 타입:</span>
                   <Select
                     value={viewType}
@@ -584,8 +584,8 @@ function ChatManagement() {
               </Col>
 
               {viewType === 'room' && (
-                <Col>
-                  <Space>
+                <Col xs={24} sm={12} md={6}>
+                  <Space wrap>
                     <span>방 ID:</span>
                     <Input
                       type="number"
@@ -601,8 +601,8 @@ function ChatManagement() {
                 </Col>
               )}
 
-              <Col>
-                <Space>
+              <Col xs={24} sm={12} md={6}>
+                <Space wrap>
                   <span>선호 언어:</span>
                   <Select
                     value={preferredLang}
@@ -617,11 +617,12 @@ function ChatManagement() {
                 </Space>
               </Col>
 
-              <Col>
+              <Col xs={24} sm={12} md={6}>
                 <Button
                   icon={<ReloadOutlined />}
                   onClick={() => fetchMessages()}
                   loading={loading}
+                  block
                 >
                   새로고침
                 </Button>
@@ -763,16 +764,19 @@ function ChatManagement() {
               )}
 
               <div className="input-row">
-                <Select
-                  value={selectedAdminId}
-                  onChange={setSelectedAdminId}
-                  style={{ width: 100 }}
-                  disabled={uploading || sending}
-                >
-                  <Option value="admin">관리자</Option>
-                  <Option value="ido">이도</Option>
-                  <Option value="isoon">이순</Option>
-                </Select>
+                <div className="admin-select-wrapper">
+                  {/* <span className="admin-select-label">관리자 역할:</span> */}
+                  <Select
+                    value={selectedAdminId}
+                    onChange={setSelectedAdminId}
+                    style={{ width: 120 }}
+                    disabled={uploading || sending}
+                  >
+                    <Option value="admin">관리자</Option>
+                    <Option value="ido">이도</Option>
+                    <Option value="isoon">이순</Option>
+                  </Select>
+                </div>
                 
                 <TextArea
                   value={messageText}
@@ -786,7 +790,7 @@ function ChatManagement() {
                     }
                   }}
                   disabled={uploading || sending}
-                  style={{ flex: 1, margin: '0 8px' }}
+                  className="message-textarea"
                 />
                 
                 <Button
@@ -795,6 +799,8 @@ function ChatManagement() {
                   onClick={handleSendMessage}
                   loading={uploading || sending}
                   disabled={(!messageText.trim() && !selectedFile) || (viewType === 'room' && !roomId)}
+                  className="send-button"
+                  block
                 >
                   전송
                 </Button>

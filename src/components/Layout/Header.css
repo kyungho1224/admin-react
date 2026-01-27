@@ -1,1 +1,32 @@
 /* Ant Design Header를 사용하므로 인라인 스타일로 처리 */
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 767px) {
+  .app-header.mobile {
+    padding: 0 12px !important;
+  }
+
+  .app-header.mobile .header-left {
+    flex: 1;
+  }
+
+  .app-header.mobile .header-right {
+    flex-shrink: 0;
+  }
+}

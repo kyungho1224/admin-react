@@ -13,10 +13,163 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* 반응형 브레이크포인트 */
+  --breakpoint-xs: 480px;
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-xxl: 1600px;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+}
+
+/* 공통 반응형 유틸리티 클래스 */
+
+/* 모바일에서 숨기기 */
+@media (max-width: 767px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+/* 데스크톱에서 숨기기 */
+@media (min-width: 768px) {
+  .hide-desktop {
+    display: none !important;
+  }
+}
+
+/* 모바일에서 전체 너비 */
+@media (max-width: 767px) {
+  .full-width-mobile {
+    width: 100% !important;
+  }
+}
+
+/* 테이블 모바일 최적화 */
+@media (max-width: 767px) {
+  .ant-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ant-table {
+    min-width: 600px;
+  }
+
+  .ant-table-thead > tr > th,
+  .ant-table-tbody > tr > td {
+    padding: 8px 4px;
+    font-size: 12px;
+  }
+}
+
+/* 폼 모바일 최적화 */
+@media (max-width: 767px) {
+  .ant-form-item {
+    margin-bottom: 16px;
+  }
+
+  .ant-form-item-label {
+    padding-bottom: 4px;
+  }
+
+  .ant-input,
+  .ant-select-selector,
+  .ant-picker {
+    font-size: 16px; /* iOS 줌 방지 */
+  }
+}
+
+/* 카드 모바일 최적화 */
+@media (max-width: 767px) {
+  .ant-card {
+    margin-bottom: 16px;
+  }
+
+  .ant-card-head {
+    padding: 12px 16px;
+    min-height: 48px;
+  }
+
+  .ant-card-body {
+    padding: 16px;
+  }
+
+  .ant-card-head-title {
+    font-size: 16px;
+  }
+}
+
+/* 버튼 모바일 최적화 */
+@media (max-width: 767px) {
+  .ant-btn {
+    min-height: 44px; /* 터치 타겟 최소 크기 */
+  }
+
+  .ant-btn-sm {
+    min-height: 32px;
+  }
+}
+
+/* 모달 모바일 최적화 */
+@media (max-width: 767px) {
+  .ant-modal {
+    margin: 0;
+    max-width: 100%;
+    top: 0;
+    padding-bottom: 0;
+  }
+
+  .ant-modal-content {
+    border-radius: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ant-modal-body {
+    flex: 1;
+    overflow-y: auto;
+  }
+}
+
+/* 스페이스 컴포넌트 모바일 최적화 */
+@media (max-width: 767px) {
+  .ant-space {
+    flex-wrap: wrap;
+  }
+
+  .ant-space-item {
+    margin-bottom: 8px;
+  }
+}
+
+/* 타이포그래피 모바일 최적화 */
+@media (max-width: 767px) {
+  h1.ant-typography,
+  .ant-typography h1 {
+    font-size: 24px;
+  }
+
+  h2.ant-typography,
+  .ant-typography h2 {
+    font-size: 20px;
+  }
+
+  h3.ant-typography,
+  .ant-typography h3 {
+    font-size: 18px;
+  }
+
+  h4.ant-typography,
+  .ant-typography h4 {
+    font-size: 16px;
+  }
 }

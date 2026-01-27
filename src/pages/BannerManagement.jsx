@@ -575,6 +575,7 @@ function BannerManagement() {
         }}
         footer={null}
         width={800}
+        className="banner-create-modal"
       >
         <Form
           form={form}
@@ -655,7 +656,7 @@ function BannerManagement() {
           </Form.Item>
 
           <Row gutter={16}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="started_at"
                 label="시작일"
@@ -668,7 +669,7 @@ function BannerManagement() {
                 />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="finished_at"
                 label="종료일"
@@ -684,7 +685,7 @@ function BannerManagement() {
           </Row>
 
           <Row gutter={16}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="sort_order"
                 label="순서"
@@ -693,7 +694,7 @@ function BannerManagement() {
                 <Input type="number" placeholder="순서 (낮을수록 먼저 표시)" />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="is_active"
                 label="활성화"
@@ -732,6 +733,7 @@ function BannerManagement() {
         }}
         footer={null}
         width={800}
+        className="banner-edit-modal"
       >
         <Form
           form={editForm}
@@ -806,7 +808,7 @@ function BannerManagement() {
           </Form.Item>
 
           <Row gutter={16}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="started_at"
                 label="시작일"
@@ -819,7 +821,7 @@ function BannerManagement() {
                 />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="finished_at"
                 label="종료일"
@@ -835,7 +837,7 @@ function BannerManagement() {
           </Row>
 
           <Row gutter={16}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="sort_order"
                 label="순서"
@@ -843,7 +845,7 @@ function BannerManagement() {
                 <Input type="number" placeholder="순서 (낮을수록 먼저 표시)" />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="is_active"
                 label="활성화"
@@ -881,6 +883,7 @@ function BannerManagement() {
         }}
         footer={null}
         width={800}
+        className="banner-image-select-modal"
       >
         <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
           {loadingImages ? (
@@ -933,6 +936,7 @@ function BannerManagement() {
         footer={null}
         width={800}
         centered
+        className="banner-preview-modal"
       >
         {previewBanner && (
           <div>

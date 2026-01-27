@@ -10,3 +10,41 @@
   font-size: 20px;
   font-weight: 600;
 }
+
+.sidebar-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-sidebar-drawer .ant-drawer-body {
+  padding: 0;
+}
+
+.mobile-sidebar-drawer .ant-drawer-header {
+  background: #001529;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-sidebar-drawer .ant-drawer-header-title {
+  color: #fff;
+}
+
+.mobile-sidebar-drawer .ant-drawer-close {
+  color: #fff;
+}
+
+.desktop-sidebar {
+  z-index: 100;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 767px) {
+  .sidebar-header {
+    padding: 16px;
+  }
+
+  .sidebar-header h2 {
+    font-size: 18px;
+  }
+}

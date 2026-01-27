@@ -1,1 +1,21 @@
 /* Ant Design Layout을 사용하므로 최소한의 커스텀 스타일만 유지 */
+
+.main-layout {
+  transition: margin-left 0.2s;
+}
+
+.main-layout.mobile {
+  margin-left: 0 !important;
+}
+
+.main-content {
+  width: 100%;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 767px) {
+  .main-content {
+    margin: 16px 8px !important;
+    padding: 16px !important;
+  }
+}

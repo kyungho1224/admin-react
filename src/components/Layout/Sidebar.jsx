@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Layout, Menu } from 'antd'
+import { Layout, Menu, Drawer } from 'antd'
 import { DashboardOutlined, NotificationOutlined, PictureOutlined, BarChartOutlined, PlayCircleOutlined, DatabaseOutlined, FileImageOutlined, LineChartOutlined, MessageOutlined, GlobalOutlined, MailOutlined, UserOutlined } from '@ant-design/icons'
 import './Sidebar.css'
 
@@ -65,11 +65,11 @@ const menuItems = [
   //   icon: <BarChartOutlined />,
   //   label: 'GA 이벤트 조회',
   // },
-  {
-    key: '/onboarding-analytics',
-    icon: <LineChartOutlined />,
-    label: '온보딩 지표 분석',
-  },
+  // {
+  //   key: '/onboarding-analytics',
+  //   icon: <LineChartOutlined />,
+  //   label: '온보딩 지표 분석',
+  // },
   {
     key: '/chat',
     icon: <MessageOutlined />,
@@ -124,12 +124,15 @@ const menuItems = [
   // },
 ]
 
-function Sidebar() {
+function Sidebar({ isMobile = false, open = false, onClose }) {
   const navigate = useNavigate()
   const location = useLocation()
 
   const handleMenuClick = ({ key }) => {
     navigate(key)
+    if (isMobile && onClose) {
+      onClose()
+    }
   }
 
   // 현재 경로에 따라 선택된 메뉴 키 결정
@@ -185,19 +188,8 @@ function Sidebar() {
     return openKeys
   }
 
-  return (
-    <Sider
-      width={250}
-      style={{
-        overflow: 'auto',
-        height: '100vh',
-        position: 'fixed',
-        left: 0,
-        top: 0,
-        bottom: 0,
-      }}
-      theme="dark"
-    >
+  const menuContent = (
+    <>
       <div className="sidebar-header">
         <h2>Admin Panel</h2>
       </div>
@@ -209,6 +201,43 @@ function Sidebar() {
         items={menuItems}
         onClick={handleMenuClick}
       />
+    </>
+  )
+
+  if (isMobile) {
+    return (
+      <Drawer
+        title="Admin Panel"
+        placement="left"
+        onClose={onClose}
+        open={open}
+        bodyStyle={{ padding: 0 }}
+        width={250}
+        className="mobile-sidebar-drawer"
+        closable={true}
+      >
+        <div className="sidebar-content">
+          {menuContent}
+        </div>
+      </Drawer>
+    )
+  }
+
+  return (
+    <Sider
+      width={250}
+      className="desktop-sidebar"
+      style={{
+        overflow: 'auto',
+        height: '100vh',
+        position: 'fixed',
+        left: 0,
+        top: 0,
+        bottom: 0,
+      }}
+      theme="dark"
+    >
+      {menuContent}
     </Sider>
   )
 }

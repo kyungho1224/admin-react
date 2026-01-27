@@ -319,7 +319,7 @@ function InAppMail() {
           }}
         >
           <Row gutter={16}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 label="알림 타입"
                 name="notification_type"
@@ -331,7 +331,7 @@ function InAppMail() {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 label="수신 대상"
                 name="notification_target"
@@ -505,7 +505,7 @@ function InAppMail() {
           <Divider>링크 설정</Divider>
 
           <Row gutter={16}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 label="링크 타입"
                 name="link_type"
@@ -521,7 +521,7 @@ function InAppMail() {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               {linkType && (
                 <Form.Item
                   label="링크 대상"
@@ -549,7 +549,7 @@ function InAppMail() {
           <Divider>기타 설정</Divider>
 
           <Row gutter={16}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 label="보상 선택"
                 name="strategy_ids"
@@ -570,7 +570,7 @@ function InAppMail() {
                 />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 label="광고 보상 플래그"
                 name="ads_reward_flag"
@@ -640,6 +640,7 @@ function InAppMail() {
         okText="선택 완료"
         cancelText="취소"
         width={800}
+        className="user-search-modal"
       >
         <Space direction="vertical" style={{ width: '100%' }} size="large">
           <Input.Group compact>

@@ -1,3 +1,78 @@
 .dashboard {
   width: 100%;
 }
+
+.dashboard .ant-typography {
+  margin-bottom: 0;
+}
+
+.dashboard .ant-card {
+  height: 100%;
+}
+
+.dashboard .ant-statistic-title {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.dashboard .ant-statistic-content {
+  font-size: 24px;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 767px) {
+  .dashboard {
+    padding: 0;
+  }
+
+  .dashboard .ant-typography-title {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .dashboard .ant-row {
+    margin-left: -8px !important;
+    margin-right: -8px !important;
+  }
+
+  .dashboard .ant-col {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .dashboard .ant-card {
+    margin-bottom: 12px;
+  }
+
+  .dashboard .ant-statistic-title {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .dashboard .ant-statistic-content {
+    font-size: 20px;
+  }
+
+  .dashboard .ant-card-body {
+    padding: 16px;
+  }
+
+  .dashboard .ant-card-head {
+    padding: 12px 16px;
+  }
+
+  .dashboard .ant-card-head-title {
+    font-size: 16px;
+  }
+
+  .dashboard .ant-card[style*="minHeight"] {
+    min-height: 200px !important;
+  }
+}
+
+/* 태블릿 반응형 */
+@media (min-width: 768px) and (max-width: 991px) {
+  .dashboard .ant-statistic-content {
+    font-size: 22px;
+  }
+}

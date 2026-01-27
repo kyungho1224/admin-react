@@ -1,5 +1,5 @@
-import { Layout, Typography, Space, Avatar, Select, Tag, Button, Modal } from 'antd'
-import { UserOutlined, LogoutOutlined, ClockCircleOutlined } from '@ant-design/icons'
+import { Layout, Typography, Space, Avatar, Select, Tag, Button, Modal, Dropdown } from 'antd'
+import { UserOutlined, LogoutOutlined, ClockCircleOutlined, MenuOutlined, DownOutlined } from '@ant-design/icons'
 import { getApiConfig, setApiEnvironment } from '../../services/apiClient'
 import { useAuth } from '../../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
@@ -10,7 +10,7 @@ const { Title } = Typography
 const { Option } = Select
 const { confirm } = Modal
 
-function Header() {
+function Header({ isMobile = false, onMenuClick }) {
   const apiConfig = getApiConfig()
   const currentEnv = apiConfig.environment
   const { user, logout, sessionTimeLeft, canExtend, extendSession } = useAuth()
@@ -45,10 +45,20 @@ function Header() {
     navigate('/login')
   }
 
+  const userMenuItems = [
+    {
+      key: 'logout',
+      label: '로그아웃',
+      icon: <LogoutOutlined />,
+      onClick: handleLogout,
+    },
+  ]
+
   return (
     <AntHeader
+      className={`app-header ${isMobile ? 'mobile' : ''}`}
       style={{
-        padding: '0 24px',
+        padding: isMobile ? '0 12px' : '0 24px',
         background: '#fff',
         display: 'flex',
         alignItems: 'center',
@@ -59,54 +69,82 @@ function Header() {
         zIndex: 1000,
       }}
     >
-      <Title level={4} style={{ margin: 0 }}>
-        관리자 대시보드
-      </Title>
-      <Space size="middle">
-        <Space size="small">
-          <span style={{ fontSize: '12px', color: '#8c8c8c' }}>환경:</span>
-          <Select
-            value={currentEnv}
-            onChange={handleEnvironmentChange}
-            style={{ width: 100 }}
-            size="small"
-          >
-            <Option value="development">개발</Option>
-            <Option value="production">운영</Option>
-          </Select>
-          <Tag color={currentEnv === 'production' ? 'red' : 'blue'} style={{ margin: 0 }}>
-            {currentEnv === 'production' ? '운영' : '개발'}
-          </Tag>
-        </Space>
-        {sessionTimeLeft !== null && (
-          <Space size="small">
-            <ClockCircleOutlined />
-            <span style={{ fontSize: '12px', color: canExtend ? '#ff4d4f' : '#8c8c8c' }}>
-              {formatSessionTime(sessionTimeLeft)}
-            </span>
-            {canExtend && (
-              <Button
-                type="link"
+      <div className="header-left">
+        {isMobile && (
+          <Button
+            type="text"
+            icon={<MenuOutlined />}
+            onClick={onMenuClick}
+            style={{ marginRight: 12 }}
+          />
+        )}
+        <Title level={4} style={{ margin: 0, fontSize: isMobile ? '16px' : '20px' }}>
+          {isMobile ? '관리자' : '관리자 대시보드'}
+        </Title>
+      </div>
+      
+      <div className="header-right">
+        {!isMobile ? (
+          <Space size="middle">
+            <Space size="small">
+              <span style={{ fontSize: '12px', color: '#8c8c8c' }}>환경:</span>
+              <Select
+                value={currentEnv}
+                onChange={handleEnvironmentChange}
+                style={{ width: 100 }}
                 size="small"
-                onClick={extendSession}
-                style={{ padding: 0, height: 'auto' }}
               >
-                연장
-              </Button>
+                <Option value="development">개발</Option>
+                <Option value="production">운영</Option>
+              </Select>
+              <Tag color={currentEnv === 'production' ? 'red' : 'blue'} style={{ margin: 0 }}>
+                {currentEnv === 'production' ? '운영' : '개발'}
+              </Tag>
+            </Space>
+            {sessionTimeLeft !== null && (
+              <Space size="small">
+                <ClockCircleOutlined />
+                <span style={{ fontSize: '12px', color: canExtend ? '#ff4d4f' : '#8c8c8c' }}>
+                  {formatSessionTime(sessionTimeLeft)}
+                </span>
+                {canExtend && (
+                  <Button
+                    type="link"
+                    size="small"
+                    onClick={extendSession}
+                    style={{ padding: 0, height: 'auto' }}
+                  >
+                    연장
+                  </Button>
+                )}
+              </Space>
             )}
+            <Avatar icon={<UserOutlined />} />
+            <span>{user?.username || '관리자'}</span>
+            <Button
+              type="text"
+              icon={<LogoutOutlined />}
+              onClick={handleLogout}
+              size="small"
+            >
+              로그아웃
+            </Button>
+          </Space>
+        ) : (
+          <Space size="small">
+            <Tag color={currentEnv === 'production' ? 'red' : 'blue'} style={{ margin: 0 }}>
+              {currentEnv === 'production' ? '운영' : '개발'}
+            </Tag>
+            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+              <Space size="small" style={{ cursor: 'pointer' }}>
+                <Avatar icon={<UserOutlined />} size="small" />
+                <span style={{ fontSize: '12px' }}>{user?.username || '관리자'}</span>
+                <DownOutlined style={{ fontSize: '10px' }} />
+              </Space>
+            </Dropdown>
           </Space>
         )}
-        <Avatar icon={<UserOutlined />} />
-        <span>{user?.username || '관리자'}</span>
-        <Button
-          type="text"
-          icon={<LogoutOutlined />}
-          onClick={handleLogout}
-          size="small"
-        >
-          로그아웃
-        </Button>
-      </Space>
+      </div>
     </AntHeader>
   )
 }

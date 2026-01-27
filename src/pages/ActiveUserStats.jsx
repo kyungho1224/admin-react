@@ -66,8 +66,15 @@ function ActiveUserStats() {
     setDownloadLoading(true)
     try {
       const statDate = dayjs(values.stat_date).format('YYYY-MM-DD')
-      await insertDownloadStats(statDate, values.total_count)
-      message.success(`${statDate}의 다운로드 수가 ${values.total_count}으로 저장되었습니다!`)
+      const result = await insertDownloadStats(statDate, values.total_count)
+      
+      // 백엔드에서 반환한 메시지 사용
+      if (result.is_updated) {
+        message.success(`${statDate}의 다운로드 수가 ${values.total_count}으로 업데이트되었습니다!`)
+      } else {
+        message.success(`${statDate}의 다운로드 수가 ${values.total_count}으로 저장되었습니다!`)
+      }
+      
       downloadForm.resetFields()
       // 데이터 새로고침
       fetchData()
@@ -215,7 +222,7 @@ function ActiveUserStats() {
       <Title level={2}>📊 다운로드 기준 액티브 전환율</Title>
       
       <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={12}>
+        <Col xs={24} sm={12}>
           <Card>
             <Row gutter={16} align="middle">
               <Col>
@@ -248,7 +255,7 @@ function ActiveUserStats() {
             </Row>
           </Card>
         </Col>
-        <Col span={12}>
+        <Col xs={24} sm={12}>
           <Card>
             <Form
               form={downloadForm}
@@ -330,7 +337,7 @@ function ActiveUserStats() {
             showSizeChanger: true,
             showTotal: (total) => `총 ${total}개`,
           }}
-          scroll={{ y: 600 }}
+          scroll={{ x: 'max-content', y: 600 }}
         />
       </Card>
     </div>

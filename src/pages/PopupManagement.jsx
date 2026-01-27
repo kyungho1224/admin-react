@@ -418,8 +418,8 @@ function PopupManagement() {
 
   return (
     <div className="popup-management">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+      <div className="popup-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <div className="popup-header-left" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <Title level={2} style={{ margin: 0 }}>
             팝업 관리
           </Title>
@@ -427,6 +427,7 @@ function PopupManagement() {
             value={selectedScreen}
             onChange={setSelectedScreen}
             style={{ width: 150 }}
+            className="screen-select"
           >
             {SCREEN_OPTIONS.map(option => (
               <Option key={option.value} value={option.value}>
@@ -439,6 +440,7 @@ function PopupManagement() {
           type="primary" 
           icon={<PlusOutlined />} 
           onClick={() => setIsModalVisible(true)}
+          className="add-popup-btn"
         >
           팝업 추가
         </Button>
@@ -467,6 +469,7 @@ function PopupManagement() {
         }}
         footer={null}
         width={800}
+        className="popup-create-modal"
       >
         <Form
           form={form}
@@ -698,6 +701,7 @@ function PopupManagement() {
         }}
         footer={null}
         width={800}
+        className="popup-edit-modal"
       >
         <Form
           form={editForm}
@@ -938,6 +942,7 @@ function PopupManagement() {
         ]}
         width={800}
         centered
+        className="popup-preview-modal"
       >
         {previewSlides.length > 0 && (
           <Carousel autoplay={false} dots>
@@ -992,6 +997,7 @@ function PopupManagement() {
         ]}
         width={900}
         centered
+        className="popup-image-select-modal"
       >
         {loadingImages ? (
           <div style={{ textAlign: 'center', padding: '40px 0' }}>

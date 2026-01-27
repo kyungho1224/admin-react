@@ -16,3 +16,55 @@
 .signup-card .ant-card-body {
   padding: 40px;
 }
+
+/* 모바일 반응형 */
+@media (max-width: 767px) {
+  .signup-page {
+    padding: 16px;
+    align-items: flex-start;
+    padding-top: 10vh;
+  }
+
+  .signup-card {
+    max-width: 100%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .signup-card .ant-card-body {
+    padding: 24px 20px;
+  }
+
+  .signup-card .ant-typography-title {
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+
+  /* 폼 모바일 최적화 */
+  .signup-card .ant-form-item {
+    margin-bottom: 20px;
+  }
+
+  .signup-card .ant-form-item-label {
+    padding-bottom: 6px;
+  }
+
+  .signup-card .ant-form-item-label > label {
+    font-size: 14px;
+  }
+
+  .signup-card .ant-input,
+  .signup-card .ant-input-password {
+    font-size: 16px; /* iOS 줌 방지 */
+    min-height: 44px;
+  }
+
+  .signup-card .ant-btn {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  /* 링크 모바일 최적화 */
+  .signup-card a {
+    font-size: 14px;
+  }
+}

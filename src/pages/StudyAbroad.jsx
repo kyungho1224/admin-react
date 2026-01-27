@@ -763,6 +763,7 @@ function StudyAbroad() {
             onCancel={() => setIsAcademyModalVisible(false)}
             footer={null}
             width={800}
+            className="academy-modal"
           >
             <Form
               form={academyForm}
@@ -843,6 +844,7 @@ function StudyAbroad() {
             width={900}
             style={{ top: 20 }}
             bodyStyle={{ maxHeight: 'calc(100vh - 100px)', overflowY: 'auto' }}
+            className="course-modal"
           >
             <Form
               form={courseForm}
@@ -1131,6 +1133,7 @@ function StudyAbroad() {
             onCancel={() => setIsImageModalVisible(false)}
             footer={null}
             width={900}
+            className="image-select-modal"
           >
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
               {/* 업로드 버튼 */}

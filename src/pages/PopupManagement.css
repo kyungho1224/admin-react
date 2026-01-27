@@ -2,5 +2,237 @@
   width: 100%;
 }
 
+/* 모바일 반응형 */
+@media (max-width: 767px) {
+  .popup-management {
+    padding: 0;
+  }
+
+  .popup-management .ant-typography-title {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+
+  /* 헤더 영역 모바일 최적화 */
+  .popup-management > div:first-child {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 12px;
+  }
+
+  .popup-management .ant-select {
+    width: 100% !important;
+  }
+
+  .popup-management .ant-btn {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  /* 카드 모바일 최적화 */
+  .popup-management .ant-card {
+    margin-bottom: 12px;
+  }
+
+  .popup-management .ant-card-body {
+    padding: 12px;
+  }
+
+  /* 테이블 모바일 최적화 */
+  .popup-management .ant-table-wrapper {
+    overflow-x: auto;
+  }
+
+  .popup-management .ant-table {
+    min-width: 900px;
+  }
+
+  .popup-management .ant-table-thead > tr > th,
+  .popup-management .ant-table-tbody > tr > td {
+    padding: 8px 4px;
+    font-size: 12px;
+  }
+
+  .popup-management .ant-image {
+    width: 60px !important;
+    height: 60px !important;
+  }
+
+  .popup-management .ant-tag {
+    font-size: 11px;
+    padding: 2px 6px;
+  }
+
+  /* 헤더 모바일 최적화 */
+  .popup-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px;
+  }
+
+  .popup-header-left {
+    width: 100%;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px;
+  }
+
+  .screen-select {
+    width: 100% !important;
+  }
+
+  .add-popup-btn {
+    width: 100%;
+  }
+
+  /* 모달 모바일 최적화 */
+  .popup-create-modal,
+  .popup-edit-modal,
+  .popup-preview-modal,
+  .popup-image-select-modal {
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .popup-create-modal .ant-modal-content,
+  .popup-edit-modal .ant-modal-content,
+  .popup-preview-modal .ant-modal-content,
+  .popup-image-select-modal .ant-modal-content {
+    border-radius: 0 !important;
+    height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .popup-create-modal .ant-modal-header,
+  .popup-edit-modal .ant-modal-header,
+  .popup-preview-modal .ant-modal-header,
+  .popup-image-select-modal .ant-modal-header {
+    padding: 16px;
+    flex-shrink: 0;
+  }
+
+  .popup-create-modal .ant-modal-title,
+  .popup-edit-modal .ant-modal-title,
+  .popup-preview-modal .ant-modal-title,
+  .popup-image-select-modal .ant-modal-title {
+    font-size: 18px;
+  }
+
+  .popup-create-modal .ant-modal-body,
+  .popup-edit-modal .ant-modal-body,
+  .popup-preview-modal .ant-modal-body,
+  .popup-image-select-modal .ant-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  .popup-create-modal .ant-modal-footer,
+  .popup-edit-modal .ant-modal-footer,
+  .popup-preview-modal .ant-modal-footer,
+  .popup-image-select-modal .ant-modal-footer {
+    padding: 12px 16px;
+    flex-shrink: 0;
+  }
+
+  /* 폼 모바일 최적화 */
+  .popup-management .ant-form-item {
+    margin-bottom: 16px;
+  }
+
+  .popup-management .ant-form-item-label {
+    padding-bottom: 4px;
+  }
+
+  .popup-management .ant-form-item-label > label {
+    font-size: 14px;
+  }
+
+  /* Input 모바일 최적화 */
+  .popup-management .ant-input,
+  .popup-management .ant-input-number,
+  .popup-management .ant-select-selector,
+  .popup-management .ant-picker {
+    font-size: 16px; /* iOS 줌 방지 */
+  }
+
+  /* 슬라이드 카드 모바일 최적화 */
+  .popup-management .ant-card .ant-card-head {
+    padding: 12px 16px;
+    min-height: 48px;
+  }
+
+  .popup-management .ant-card .ant-card-head-title {
+    font-size: 14px;
+  }
+
+  .popup-management .ant-card .ant-card-body {
+    padding: 12px;
+  }
+
+  .popup-management .ant-card .ant-image {
+    width: 100% !important;
+    max-width: 200px !important;
+    height: auto !important;
+    max-height: 200px !important;
+  }
+
+  .popup-management .ant-card .ant-btn {
+    width: 100%;
+    height: 150px;
+    font-size: 14px;
+  }
+
+  /* 버튼 모바일 최적화 */
+  .popup-management .ant-space {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .popup-management .ant-space-item {
+    width: 100%;
+  }
+
+  /* 이미지 선택 모달 모바일 최적화 */
+  .popup-management .ant-modal-body .ant-row {
+    margin-left: -8px !important;
+    margin-right: -8px !important;
+  }
+
+  .popup-management .ant-modal-body .ant-col {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    margin-bottom: 12px;
+  }
+
+  .popup-management .ant-modal-body .ant-card {
+    margin-bottom: 0;
+  }
+
+  .popup-management .ant-modal-body .ant-card-body {
+    padding: 8px;
+  }
+
+  .popup-management .ant-modal-body .ant-image {
+    height: 120px !important;
+  }
+
+  /* Carousel 모바일 최적화 */
+  .popup-management .ant-carousel .ant-image {
+    max-height: 300px !important;
+  }
+}
+
+/* 태블릿 반응형 */
+@media (min-width: 768px) and (max-width: 991px) {
+  .popup-management {
+    padding: 16px;
+  }
+}
+
 
 

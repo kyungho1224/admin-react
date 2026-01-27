@@ -1,0 +1,14 @@
+// 모든 API 함수를 한 곳에서 export
+// 기존 import 경로 유지: import { login } from '../services/api'
+
+export * from './auth'
+export * from './popups'
+export * from './analytics'
+export * from './games'
+export * from './banners'
+export * from './onboarding'
+export * from './chat'
+export * from './studyAbroad'
+export * from './inAppMail'
+export * from './strategies'
+export * from './users'
