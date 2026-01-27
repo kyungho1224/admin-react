@@ -800,7 +800,6 @@ function ChatManagement() {
                   loading={uploading || sending}
                   disabled={(!messageText.trim() && !selectedFile) || (viewType === 'room' && !roomId)}
                   className="send-button"
-                  block
                 >
                   전송
                 </Button>

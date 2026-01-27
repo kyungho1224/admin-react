@@ -449,6 +449,34 @@
     width: 100% !important;
     min-height: 44px;
   }
+}
+
+/* 데스크톱 스타일 (모바일 스타일이 적용되지 않도록) */
+@media (min-width: 768px) {
+  .input-row {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+
+  .admin-select-wrapper {
+    width: auto;
+    flex-shrink: 0;
+  }
+
+  .admin-select-wrapper .ant-select {
+    width: 120px !important;
+    flex: none;
+  }
+
+  .message-textarea {
+    flex: 1;
+    margin: 0 8px !important;
+  }
+
+  .send-button {
+    width: auto !important;
+    flex-shrink: 0;
+  }
 
   /* 답장 프리뷰 모바일 최적화 */
   .reply-preview {
