@@ -1,0 +1,11 @@
+.class-reservation {
+  padding: 24px;
+}
+
+.class-reservation .ant-card {
+  margin-bottom: 16px;
+}
+
+.class-reservation .ant-table {
+  margin-top: 16px;
+}

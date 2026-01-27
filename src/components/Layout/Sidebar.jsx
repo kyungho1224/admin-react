@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Drawer } from 'antd'
-import { DashboardOutlined, NotificationOutlined, PictureOutlined, BarChartOutlined, PlayCircleOutlined, DatabaseOutlined, FileImageOutlined, LineChartOutlined, MessageOutlined, GlobalOutlined, MailOutlined, UserOutlined } from '@ant-design/icons'
+import { DashboardOutlined, NotificationOutlined, PictureOutlined, BarChartOutlined, PlayCircleOutlined, DatabaseOutlined, FileImageOutlined, LineChartOutlined, MessageOutlined, GlobalOutlined, MailOutlined, UserOutlined, BookOutlined } from '@ant-design/icons'
 import './Sidebar.css'
 
 const { Sider } = Layout
@@ -75,15 +75,35 @@ const menuItems = [
     icon: <MessageOutlined />,
     label: '채팅 관리',
   },
-  {
-    key: '/in-app-mail',
-    icon: <MailOutlined />,
-    label: '인앱 메일 발송',
-  },
+  // {
+  //   key: '/in-app-mail',
+  //   icon: <MailOutlined />,
+  //   label: '인앱 메일 발송',
+  // },
   {
     key: '/active-user-stats',
     icon: <UserOutlined />,
     label: '액티브 전환율',
+  },
+  {
+    key: '/class-reservation',
+    icon: <BookOutlined />,
+    label: '1:1 클래스 관리',
+    children: [
+      {
+        key: '/class-reservation/classes',
+        label: '클래스 관리',
+      },
+      {
+        key: '/class-reservation/reservations',
+        label: '예약 현황',
+      },
+      {
+        key: '/class-reservation/images',
+        icon: <PictureOutlined />,
+        label: '이미지 관리',
+      },
+    ],
   },
   {
     key: '/k-life',
@@ -166,6 +186,18 @@ function Sidebar({ isMobile = false, open = false, onClose }) {
     if (path.startsWith('/active-user-stats')) {
       return ['/active-user-stats']
     }
+    if (path.startsWith('/class-reservation')) {
+      if (path.startsWith('/class-reservation/images')) {
+        return ['/class-reservation/images']
+      }
+      if (path.startsWith('/class-reservation/reservations')) {
+        return ['/class-reservation/reservations']
+      }
+      if (path.startsWith('/class-reservation/classes')) {
+        return ['/class-reservation/classes']
+      }
+      return ['/class-reservation/classes']
+    }
     return [path]
   }
 
@@ -184,6 +216,9 @@ function Sidebar({ isMobile = false, open = false, onClose }) {
     }
     if (path.startsWith('/k-life')) {
       openKeys.push('/k-life')
+    }
+    if (path.startsWith('/class-reservation')) {
+      openKeys.push('/class-reservation')
     }
     return openKeys
   }
