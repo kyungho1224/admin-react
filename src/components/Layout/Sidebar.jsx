@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu } from 'antd'
-import { DashboardOutlined, NotificationOutlined, PictureOutlined, BarChartOutlined, PlayCircleOutlined, DatabaseOutlined, FileImageOutlined, LineChartOutlined, MessageOutlined, GlobalOutlined } from '@ant-design/icons'
+import { DashboardOutlined, NotificationOutlined, PictureOutlined, BarChartOutlined, PlayCircleOutlined, DatabaseOutlined, FileImageOutlined, LineChartOutlined, MessageOutlined, GlobalOutlined, MailOutlined, UserOutlined } from '@ant-design/icons'
 import './Sidebar.css'
 
 const { Sider } = Layout
@@ -76,6 +76,16 @@ const menuItems = [
     label: '채팅 관리',
   },
   {
+    key: '/in-app-mail',
+    icon: <MailOutlined />,
+    label: '인앱 메일 발송',
+  },
+  {
+    key: '/active-user-stats',
+    icon: <UserOutlined />,
+    label: '액티브 전환율',
+  },
+  {
     key: '/k-life',
     icon: <GlobalOutlined />,
     label: 'K-Life',
@@ -146,6 +156,12 @@ function Sidebar() {
     }
     if (path.startsWith('/k-life')) {
       return [path]
+    }
+    if (path.startsWith('/in-app-mail')) {
+      return ['/in-app-mail']
+    }
+    if (path.startsWith('/active-user-stats')) {
+      return ['/active-user-stats']
     }
     return [path]
   }

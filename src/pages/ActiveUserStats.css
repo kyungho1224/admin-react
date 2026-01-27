@@ -1,0 +1,33 @@
+.active-user-stats {
+  padding: 24px;
+}
+
+.active-user-stats .ant-card {
+  margin-bottom: 16px;
+}
+
+.active-user-stats .ant-table {
+  font-size: 14px;
+}
+
+.active-user-stats .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+}
+
+/* Daily 테이블 타이틀과 헤더 고정 */
+.active-user-stats .daily-title {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #fff;
+  padding: 16px 0 8px 0;
+  margin-bottom: 0;
+}
+
+.active-user-stats .ant-table-wrapper .ant-table-thead > tr > th {
+  position: sticky;
+  top: 60px;
+  z-index: 9;
+  background: #fafafa;
+}

@@ -15,6 +15,8 @@ import GameDataDetail from './pages/GameDataDetail'
 import OnboardingAnalytics from './pages/OnboardingAnalytics'
 import ChatManagement from './pages/ChatManagement'
 import StudyAbroad from './pages/StudyAbroad'
+import InAppMail from './pages/InAppMail'
+import ActiveUserStats from './pages/ActiveUserStats'
 import './App.css'
 
 function App() {
@@ -40,6 +42,8 @@ function App() {
             <Route path="ga-events" element={<GAEventManagement />} />
             <Route path="onboarding-analytics" element={<OnboardingAnalytics />} />
             <Route path="chat" element={<ChatManagement />} />
+            <Route path="in-app-mail" element={<InAppMail />} />
+            <Route path="active-user-stats" element={<ActiveUserStats />} />
             <Route path="k-life/study-abroad" element={<StudyAbroad />} />
             <Route path="games" element={<GameManagement />} />
             <Route path="games/data" element={<GameDataDetail />} />
