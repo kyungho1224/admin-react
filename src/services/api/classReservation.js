@@ -398,6 +398,47 @@ export async function createFeedback(reservationId, feedbackData) {
 }
 
 /**
+ * 피드백 수정
+ * @param {number} reservationId - 예약 ID
+ * @param {Object} feedbackData - 피드백 데이터 (feedback_content)
+ */
+export async function updateFeedback(reservationId, feedbackData) {
+  const url = getServiceUrl(ServicePort.NOTIFICATION, `/v3/admin/class-reservation/reservations/${reservationId}/feedback`)
+  
+  try {
+    const requestData = {
+      feedback_content: feedbackData.feedback || feedbackData.feedback_content,
+    }
+    
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(requestData),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(
+        errorData.detail ||
+        errorData.result?.message ||
+        errorData.message ||
+        '피드백 수정 실패'
+      )
+    }
+
+    return handleResponse(response)
+  } catch (error) {
+    console.error('[ClassReservation API] 피드백 수정 실패:', {
+      url,
+      reservationId,
+      feedbackData,
+      error: error.message,
+    })
+    throw error
+  }
+}
+
+/**
  * 예약 취소 (관리자/선생님)
  * @param {number} reservationId - 예약 ID
  * @param {Object} cancellationData - 취소 데이터
@@ -430,6 +471,81 @@ export async function cancelReservationByAdmin(reservationId, cancellationData) 
       url,
       reservationId,
       cancellationData,
+      error: error.message,
+    })
+    throw error
+  }
+}
+
+/**
+ * 서비스 설정 목록 조회
+ */
+export async function getServiceConfigs() {
+  const url = getServiceUrl(ServicePort.NOTIFICATION, `/v3/admin/class-reservation/service-configs`)
+  
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(
+        errorData.detail ||
+        errorData.result?.message ||
+        errorData.message ||
+        '서비스 설정 조회 실패'
+      )
+    }
+
+    return handleResponse(response)
+  } catch (error) {
+    console.error('[ClassReservation API] 서비스 설정 조회 실패:', {
+      url,
+      error: error.message,
+    })
+    throw error
+  }
+}
+
+/**
+ * 서비스 설정 수정
+ * @param {number} configId - 설정 ID
+ * @param {string} configValue - 설정 값
+ * @param {string} description - 설정 설명 (선택)
+ */
+export async function updateServiceConfig(configId, configValue, description = null) {
+  const url = getServiceUrl(ServicePort.NOTIFICATION, `/v3/admin/class-reservation/service-configs/${configId}`)
+  
+  try {
+    const body = { config_value: configValue }
+    if (description !== null) {
+      body.description = description
+    }
+    
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(body),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(
+        errorData.detail ||
+        errorData.result?.message ||
+        errorData.message ||
+        '서비스 설정 수정 실패'
+      )
+    }
+
+    return handleResponse(response)
+  } catch (error) {
+    console.error('[ClassReservation API] 서비스 설정 수정 실패:', {
+      url,
+      configId,
+      configValue,
       error: error.message,
     })
     throw error

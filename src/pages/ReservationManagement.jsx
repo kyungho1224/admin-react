@@ -25,6 +25,7 @@ import {
   getReservations,
   updateEntryLink,
   createFeedback,
+  updateFeedback,
   cancelReservationByAdmin,
 } from '../services/api'
 import './ClassReservation.css'
@@ -49,6 +50,7 @@ function ReservationManagement() {
   
   // 모달 상태
   const [isFeedbackModalVisible, setIsFeedbackModalVisible] = useState(false)
+  const [feedbackModalMode, setFeedbackModalMode] = useState('create') // 'create' | 'view' | 'edit'
   const [isEntryLinkModalVisible, setIsEntryLinkModalVisible] = useState(false)
   const [isCancelModalVisible, setIsCancelModalVisible] = useState(false)
   const [selectedReservation, setSelectedReservation] = useState(null)
@@ -100,14 +102,38 @@ function ReservationManagement() {
       await createFeedback(selectedReservation.id, {
         feedback_content: values.feedback,
       })
-      message.success('피드백이 등록되었습니다.')
+      message.success('피드백이 등록되었습니다. 예약 상태가 "진행 완료"로 변경됩니다.')
       setIsFeedbackModalVisible(false)
+      setFeedbackModalMode('create')
       feedbackForm.resetFields()
       setSelectedReservation(null)
-      fetchReservations()
+      await fetchReservations()
     } catch (error) {
       console.error('피드백 등록 실패:', error)
       message.error(error.message || '피드백 등록에 실패했습니다.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 피드백 수정
+  const handleFeedbackUpdateSubmit = async (values) => {
+    if (!selectedReservation) return
+
+    setLoading(true)
+    try {
+      await updateFeedback(selectedReservation.id, {
+        feedback_content: values.feedback,
+      })
+      message.success('피드백이 수정되었습니다.')
+      setIsFeedbackModalVisible(false)
+      setFeedbackModalMode('create')
+      feedbackForm.resetFields()
+      setSelectedReservation(null)
+      await fetchReservations()
+    } catch (error) {
+      console.error('피드백 수정 실패:', error)
+      message.error(error.message || '피드백 수정에 실패했습니다.')
     } finally {
       setLoading(false)
     }
@@ -167,28 +193,68 @@ function ReservationManagement() {
       title: '예약 일시',
       key: 'schedule',
       width: 180,
-      render: (_, record) => (
-        <div>
-          <div>{record.schedule_date || '-'}</div>
-          <Text type="secondary" style={{ fontSize: '12px' }}>
-            {record.schedule_start_time || record.start_time} ~ {record.schedule_end_time || record.end_time}
-          </Text>
-        </div>
-      ),
+      render: (_, record) => {
+        // 시간이 숫자(초)로 오는 경우 문자열로 변환
+        const formatTime = (time) => {
+          if (!time) return '-'
+          // 숫자인 경우 (초 단위)
+          if (typeof time === 'number') {
+            const hours = Math.floor(time / 3600)
+            const minutes = Math.floor((time % 3600) / 60)
+            const seconds = time % 60
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+          }
+          // 문자열인 경우 그대로 반환
+          if (typeof time === 'string') {
+            // HH:mm:ss 형식이면 그대로, 아니면 파싱 시도
+            if (time.includes(':')) {
+              return time
+            }
+            // 숫자 문자열인 경우
+            const numTime = parseInt(time, 10)
+            if (!isNaN(numTime)) {
+              const hours = Math.floor(numTime / 3600)
+              const minutes = Math.floor((numTime % 3600) / 60)
+              const seconds = numTime % 60
+              return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+            }
+          }
+          return time
+        }
+        
+        const startTime = formatTime(record.schedule_start_time || record.start_time)
+        const endTime = formatTime(record.schedule_end_time || record.end_time)
+        
+        return (
+          <div>
+            <div>{record.schedule_date || '-'}</div>
+            <Text type="secondary" style={{ fontSize: '12px' }}>
+              {startTime} ~ {endTime}
+            </Text>
+          </div>
+        )
+      },
     },
     {
       title: '상태',
       dataIndex: 'status',
       key: 'status',
-      width: 120,
-      render: (status) => {
+      width: 140,
+      render: (status, record) => {
         const statusMap = {
           reserved: { color: 'blue', text: '예약 완료' },
           completed: { color: 'green', text: '진행 완료' },
           cancelled: { color: 'red', text: '취소됨' },
         }
         const statusInfo = statusMap[status] || { color: 'default', text: status }
-        return <Tag color={statusInfo.color}>{statusInfo.text}</Tag>
+        return (
+          <Space direction="vertical" size={0}>
+            <Tag color={statusInfo.color}>{statusInfo.text}</Tag>
+            {record.feedback_content && (
+              <Text type="secondary" style={{ fontSize: '11px' }}>피드백 등록됨</Text>
+            )}
+          </Space>
+        )
       },
     },
     {
@@ -225,16 +291,30 @@ function ReservationManagement() {
               입장 링크
             </Button>
           )}
-          {record.status === 'completed' && !record.feedback_content && (
+          {record.status === 'reserved' && (
             <Button
               size="small"
               onClick={() => {
                 setSelectedReservation(record)
+                setFeedbackModalMode('create')
+                feedbackForm.setFieldValue('feedback', '')
+                setIsFeedbackModalVisible(true)
+              }}
+            >
+              피드백 등록
+            </Button>
+          )}
+          {record.feedback_content && (
+            <Button
+              size="small"
+              onClick={() => {
+                setSelectedReservation(record)
+                setFeedbackModalMode('view')
                 feedbackForm.setFieldValue('feedback', record.feedback_content || '')
                 setIsFeedbackModalVisible(true)
               }}
             >
-              피드백
+              피드백 보기/수정
             </Button>
           )}
           {record.status === 'reserved' && (
@@ -405,48 +485,86 @@ function ReservationManagement() {
         </Form>
       </Modal>
 
-      {/* 피드백 등록 모달 */}
+      {/* 피드백 등록/보기/수정 모달 */}
       <Modal
-        title="피드백 등록"
+        title={
+          feedbackModalMode === 'create'
+            ? '피드백 등록'
+            : feedbackModalMode === 'view'
+            ? '피드백 보기'
+            : '피드백 수정'
+        }
         open={isFeedbackModalVisible}
         onCancel={() => {
           setIsFeedbackModalVisible(false)
+          setFeedbackModalMode('create')
           feedbackForm.resetFields()
           setSelectedReservation(null)
         }}
         footer={null}
         width={600}
       >
-        <Form
-          form={feedbackForm}
-          layout="vertical"
-          onFinish={handleFeedbackSubmit}
-        >
-          <Form.Item
-            label="피드백"
-            name="feedback"
-            rules={[{ required: true, message: '피드백을 입력해주세요.' }]}
-          >
-            <TextArea rows={6} placeholder="수업 피드백을 입력하세요" />
-          </Form.Item>
-
-          <Form.Item>
+        {feedbackModalMode === 'view' ? (
+          <>
+            <div style={{ marginBottom: 16, whiteSpace: 'pre-wrap', minHeight: 120, padding: 12, background: '#fafafa', borderRadius: 4 }}>
+              <Text>{selectedReservation?.feedback_content || '-'}</Text>
+            </div>
             <Space>
-              <Button type="primary" htmlType="submit" loading={loading}>
-                저장
+              <Button
+                type="primary"
+                onClick={() => setFeedbackModalMode('edit')}
+              >
+                수정
               </Button>
               <Button
                 onClick={() => {
                   setIsFeedbackModalVisible(false)
-                  feedbackForm.resetFields()
+                  setFeedbackModalMode('create')
                   setSelectedReservation(null)
                 }}
               >
-                취소
+                닫기
               </Button>
             </Space>
-          </Form.Item>
-        </Form>
+          </>
+        ) : (
+          <Form
+            form={feedbackForm}
+            layout="vertical"
+            onFinish={feedbackModalMode === 'create' ? handleFeedbackSubmit : handleFeedbackUpdateSubmit}
+          >
+            <Form.Item
+              label="피드백"
+              name="feedback"
+              rules={[{ required: true, message: '피드백을 입력해주세요.' }]}
+            >
+              <TextArea rows={6} placeholder="수업 피드백을 입력하세요" />
+            </Form.Item>
+
+            <Form.Item>
+              <Space>
+                <Button type="primary" htmlType="submit" loading={loading}>
+                  {feedbackModalMode === 'create' ? '등록' : '저장'}
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (feedbackModalMode === 'edit') {
+                      feedbackForm.setFieldValue('feedback', selectedReservation?.feedback_content || '')
+                      setFeedbackModalMode('view')
+                    } else {
+                      setIsFeedbackModalVisible(false)
+                      setFeedbackModalMode('create')
+                      feedbackForm.resetFields()
+                      setSelectedReservation(null)
+                    }
+                  }}
+                >
+                  {feedbackModalMode === 'edit' ? '취소' : '닫기'}
+                </Button>
+              </Space>
+            </Form.Item>
+          </Form>
+        )}
       </Modal>
 
       {/* 예약 취소 모달 */}

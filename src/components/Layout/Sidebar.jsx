@@ -1,16 +1,21 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Drawer } from 'antd'
-import { DashboardOutlined, NotificationOutlined, PictureOutlined, BarChartOutlined, PlayCircleOutlined, DatabaseOutlined, FileImageOutlined, LineChartOutlined, MessageOutlined, GlobalOutlined, MailOutlined, UserOutlined, BookOutlined } from '@ant-design/icons'
+import { DashboardOutlined, NotificationOutlined, PictureOutlined, BarChartOutlined, PlayCircleOutlined, DatabaseOutlined, FileImageOutlined, LineChartOutlined, MessageOutlined, GlobalOutlined, MailOutlined, UserOutlined, BookOutlined, SettingOutlined } from '@ant-design/icons'
 import './Sidebar.css'
 
 const { Sider } = Layout
 
 // 확장 가능한 메뉴 구조
 const menuItems = [
+  // {
+  //   key: '/',
+  //   icon: <DashboardOutlined />,
+  //   label: '대시보드',
+  // },
   {
-    key: '/',
-    icon: <DashboardOutlined />,
-    label: '대시보드',
+    key: '/onboarding-analytics',
+    icon: <LineChartOutlined />,
+    label: '온보딩 지표 분석',
   },
   {
     key: '/popup',
@@ -65,11 +70,6 @@ const menuItems = [
   //   icon: <BarChartOutlined />,
   //   label: 'GA 이벤트 조회',
   // },
-  // {
-  //   key: '/onboarding-analytics',
-  //   icon: <LineChartOutlined />,
-  //   label: '온보딩 지표 분석',
-  // },
   {
     key: '/chat',
     icon: <MessageOutlined />,
@@ -85,57 +85,62 @@ const menuItems = [
     icon: <UserOutlined />,
     label: '액티브 전환율',
   },
-  {
-    key: '/class-reservation',
-    icon: <BookOutlined />,
-    label: '1:1 클래스 관리',
-    children: [
-      {
-        key: '/class-reservation/classes',
-        label: '클래스 관리',
-      },
-      {
-        key: '/class-reservation/reservations',
-        label: '예약 현황',
-      },
-      {
-        key: '/class-reservation/images',
-        icon: <PictureOutlined />,
-        label: '이미지 관리',
-      },
-    ],
-  },
-  {
-    key: '/k-life',
-    icon: <GlobalOutlined />,
-    label: 'K-Life',
-    children: [
-      {
-        key: '/k-life/info',
-        label: '정보',
-      },
-      {
-        key: '/k-life/follower-boost',
-        label: 'FollowerBoost',
-      },
-      {
-        key: '/k-life/post-boost',
-        label: 'PostBoost',
-      },
-      {
-        key: '/k-life/meetup',
-        label: '모임',
-      },
-      {
-        key: '/k-life/campaign',
-        label: '캠페인',
-      },
-      {
-        key: '/k-life/study-abroad',
-        label: '어학연수',
-      },
-    ],
-  },
+  // {
+  //   key: '/class-reservation',
+  //   icon: <BookOutlined />,
+  //   label: '1:1 클래스 관리',
+  //   children: [
+  //     {
+  //       key: '/class-reservation/classes',
+  //       label: '클래스 관리',
+  //     },
+  //     {
+  //       key: '/class-reservation/reservations',
+  //       label: '예약 현황',
+  //     },
+  //     {
+  //       key: '/class-reservation/images',
+  //       icon: <PictureOutlined />,
+  //       label: '이미지 관리',
+  //     },
+  //     {
+  //       key: '/class-reservation/config',
+  //       icon: <SettingOutlined />,
+  //       label: '설정',
+  //     },
+  //   ],
+  // },
+  // {
+  //   key: '/k-life',
+  //   icon: <GlobalOutlined />,
+  //   label: 'K-Life',
+  //   children: [
+  //     {
+  //       key: '/k-life/info',
+  //       label: '정보',
+  //     },
+  //     {
+  //       key: '/k-life/follower-boost',
+  //       label: 'FollowerBoost',
+  //     },
+  //     {
+  //       key: '/k-life/post-boost',
+  //       label: 'PostBoost',
+  //     },
+  //     {
+  //       key: '/k-life/meetup',
+  //       label: '모임',
+  //     },
+  //     {
+  //       key: '/k-life/campaign',
+  //       label: '캠페인',
+  //     },
+  //     {
+  //       key: '/k-life/study-abroad',
+  //       label: '어학연수',
+  //     },
+  //   ],
+  // },
   // 향후 메뉴 추가 가능
   // {
   //   key: '/users',
@@ -192,6 +197,9 @@ function Sidebar({ isMobile = false, open = false, onClose }) {
       }
       if (path.startsWith('/class-reservation/reservations')) {
         return ['/class-reservation/reservations']
+      }
+      if (path.startsWith('/class-reservation/config')) {
+        return ['/class-reservation/config']
       }
       if (path.startsWith('/class-reservation/classes')) {
         return ['/class-reservation/classes']

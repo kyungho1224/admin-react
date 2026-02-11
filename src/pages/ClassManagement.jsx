@@ -62,6 +62,7 @@ function ClassManagement() {
   const [editingSchedule, setEditingSchedule] = useState(null)
   const [selectedClassForSchedule, setSelectedClassForSchedule] = useState(null)
   const [schedules, setSchedules] = useState([])
+  const [scheduleDateFilter, setScheduleDateFilter] = useState(null)
   const [isImageModalVisible, setIsImageModalVisible] = useState(false)
   const [imageModalType, setImageModalType] = useState('thumbnail')
   const [thumbnailImages, setThumbnailImages] = useState([])
@@ -164,7 +165,8 @@ function ClassManagement() {
     setLoading(true)
     try {
       const data = await getClassSchedules(classId)
-      setSchedules(data?.items || data || [])
+      const allSchedules = data?.items || data || []
+      setSchedules(allSchedules)
     } catch (error) {
       console.error('일정 목록 조회 실패:', error)
       message.error(error.message || '일정 목록을 불러오는데 실패했습니다.')
@@ -173,6 +175,15 @@ function ClassManagement() {
       setLoading(false)
     }
   }
+
+  // 필터링된 일정 목록
+  const filteredSchedules = scheduleDateFilter
+    ? schedules.filter((schedule) => {
+        const scheduleDate = dayjs(schedule.schedule_date).format('YYYY-MM-DD')
+        const filterDate = dayjs(scheduleDateFilter).format('YYYY-MM-DD')
+        return scheduleDate === filterDate
+      })
+    : schedules
 
   // 일정 관리 Drawer 열기
   const openScheduleDrawer = (classRecord) => {
@@ -609,35 +620,57 @@ function ClassManagement() {
           setIsScheduleDrawerVisible(false)
           setSelectedClassForSchedule(null)
           setSchedules([])
+          setScheduleDateFilter(null)
           setEditingSchedule(null)
           scheduleForm.resetFields()
         }}
       >
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => {
-                setEditingSchedule(null)
-                scheduleForm.resetFields()
-                scheduleForm.setFieldValue('max_reservations', 1)
-                setIsScheduleModalVisible(true)
-              }}
-            >
-              일정 등록
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => selectedClassForSchedule && fetchSchedules(selectedClassForSchedule.id)}
-              loading={loading}
-            >
-              새로고침
-            </Button>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+            <Space>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => {
+                  setEditingSchedule(null)
+                  scheduleForm.resetFields()
+                  scheduleForm.setFieldValue('max_reservations', 1)
+                  setIsScheduleModalVisible(true)
+                }}
+              >
+                일정 등록
+              </Button>
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={() => selectedClassForSchedule && fetchSchedules(selectedClassForSchedule.id)}
+                loading={loading}
+              >
+                새로고침
+              </Button>
+            </Space>
+            <Space>
+              <span>날짜 필터:</span>
+              <DatePicker
+                value={scheduleDateFilter ? dayjs(scheduleDateFilter) : null}
+                onChange={(date) => setScheduleDateFilter(date ? date.format('YYYY-MM-DD') : null)}
+                format="YYYY-MM-DD"
+                placeholder="전체"
+                allowClear
+                style={{ width: 150 }}
+              />
+              {scheduleDateFilter && (
+                <Button
+                  size="small"
+                  onClick={() => setScheduleDateFilter(null)}
+                >
+                  전체 보기
+                </Button>
+              )}
+            </Space>
           </div>
 
           <Table
-            dataSource={schedules}
+            dataSource={filteredSchedules}
             rowKey="id"
             loading={loading}
             columns={[
@@ -761,7 +794,13 @@ function ClassManagement() {
             pagination={{
               pageSize: 10,
               showSizeChanger: true,
-              showTotal: (total) => `총 ${total}개`,
+              showTotal: (total) => {
+                const totalCount = schedules.length
+                if (scheduleDateFilter) {
+                  return `필터링: ${total}개 / 전체: ${totalCount}개`
+                }
+                return `총 ${total}개`
+              },
             }}
           />
         </Space>

@@ -20,6 +20,7 @@ import ActiveUserStats from './pages/ActiveUserStats'
 import ClassManagement from './pages/ClassManagement'
 import ReservationManagement from './pages/ReservationManagement'
 import ClassImageManagement from './pages/ClassImageManagement'
+import ClassServiceConfig from './pages/ClassServiceConfig'
 import './App.css'
 
 function App() {
@@ -37,7 +38,7 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<Dashboard />} />
+            <Route index element={<Navigate to="/onboarding-analytics" replace />} />
             <Route path="popup" element={<PopupManagement />} />
             <Route path="images" element={<ImageManagement />} />
             <Route path="banner" element={<BannerManagement />} />
@@ -50,6 +51,7 @@ function App() {
             <Route path="class-reservation/classes" element={<ClassManagement />} />
             <Route path="class-reservation/reservations" element={<ReservationManagement />} />
             <Route path="class-reservation/images" element={<ClassImageManagement />} />
+            <Route path="class-reservation/config" element={<ClassServiceConfig />} />
             <Route path="k-life/study-abroad" element={<StudyAbroad />} />
             <Route path="games" element={<GameManagement />} />
             <Route path="games/data" element={<GameDataDetail />} />

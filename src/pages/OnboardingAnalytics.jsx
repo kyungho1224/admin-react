@@ -1,609 +1,533 @@
 import { useState, useEffect } from 'react'
-import { Card, Table, Button, DatePicker, Typography, Space, message, Tag, Spin, Tabs, Statistic, Row, Col, Progress } from 'antd'
-import { ReloadOutlined } from '@ant-design/icons'
+import {
+  Card,
+  Table,
+  Button,
+  DatePicker,
+  Typography,
+  Space,
+  message,
+  Tag,
+  Spin,
+  Tabs,
+  Row,
+  Col,
+  Statistic,
+  Progress,
+} from 'antd'
+import { ReloadOutlined, BarChartOutlined, UnorderedListOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
-import { getModeSelectionStats, getQuickStartDropoff, getAiModeDropoff, getCategoryViewStats } from '../services/api'
+import { getUserTypeStats, getUserTypeDetail } from '../services/api'
 import './OnboardingAnalytics.css'
 
 const { Title } = Typography
 const { RangePicker } = DatePicker
-const { TabPane } = Tabs
+
+// current_step_id → 한글 라벨 매핑
+// home_quick_quest는 is_completed에 따라 분기: false→온보딩-홈 퀘스트, true→온보딩 완료
+export const STEP_ID_MAP = {
+  step_01_welcome: '온보딩-웰컴',
+  step_02_pageview: '온보딩-페이지뷰',
+  step_03_purchase: '온보딩-결제 페이지',
+  step_04_level: '온보딩-학습 수준 선택',
+  home_quick_quest: '온보딩-퀘스트',
+  null: '온보딩 완료',
+}
+
+// user_type → 한글 라벨 매핑
+export const USER_TYPE_MAP = {
+  PAID_USER: '멤버십 전환 유저',
+  PROMOTION_USER: '프로모션 멤버십 유저',
+  IN_PROGRESS: '진행중',
+}
+
+function getStepLabel(stepId, isCompleted) {
+  if (stepId === 'home_quick_quest') {
+    return isCompleted === 1 || isCompleted === true ? '온보딩 완료' : '온보딩-홈 퀘스트'
+  }
+  return STEP_ID_MAP[stepId] ?? stepId ?? '온보딩 완료'
+}
 
 function OnboardingAnalytics() {
   const [loading, setLoading] = useState(false)
   const [dateRange, setDateRange] = useState([dayjs().subtract(7, 'day'), dayjs()])
-  const [activeTab, setActiveTab] = useState('mode-selection')
+  const [detailDate, setDetailDate] = useState(dayjs())
+  const [activeTab, setActiveTab] = useState('stats')
 
-  // 각 탭별 데이터 상태
-  const [modeSelectionData, setModeSelectionData] = useState(null)
-  const [quickStartData, setQuickStartData] = useState(null)
-  const [aiModeData, setAiModeData] = useState(null)
-  const [categoryData, setCategoryData] = useState(null)
+  const [statsData, setStatsData] = useState([])
+  const [detailData, setDetailData] = useState([])
 
-  // 날짜 범위 포맷팅
-  const getDateRange = () => {
-    return {
-      startDate: dateRange[0].format('YYYY-MM-DD'),
-      endDate: dateRange[1].format('YYYY-MM-DD'),
-    }
-  }
+  const getDateRange = () => ({
+    startDate: dateRange[0]?.format('YYYY-MM-DD'),
+    endDate: dateRange[1]?.format('YYYY-MM-DD'),
+  })
 
-  // 모드 선택 통계 조회
-  const fetchModeSelectionStats = async () => {
+  const fetchStats = async () => {
     setLoading(true)
     try {
       const { startDate, endDate } = getDateRange()
-      const data = await getModeSelectionStats(startDate, endDate)
-      setModeSelectionData(data)
+      const data = await getUserTypeStats(startDate, endDate)
+      setStatsData(Array.isArray(data) ? data : [])
     } catch (error) {
-      console.error('모드 선택 통계 조회 실패:', error)
-      message.error(error.message || '모드 선택 통계를 불러오는데 실패했습니다.')
-      setModeSelectionData(null)
+      console.error('유저 타입 통계 조회 실패:', error)
+      message.error(error.message || '유저 타입 통계를 불러오는데 실패했습니다.')
+      setStatsData([])
     } finally {
       setLoading(false)
     }
   }
 
-  // 퀵스타트 이탈 통계 조회
-  const fetchQuickStartDropoff = async () => {
+  const fetchDetail = async () => {
     setLoading(true)
     try {
-      const { startDate, endDate } = getDateRange()
-      const data = await getQuickStartDropoff(startDate, endDate)
-      setQuickStartData(data)
+      const date = detailDate.format('YYYY-MM-DD')
+      const data = await getUserTypeDetail(date)
+      setDetailData(Array.isArray(data) ? data : [])
     } catch (error) {
-      console.error('퀵스타트 이탈 통계 조회 실패:', error)
-      message.error(error.message || '퀵스타트 이탈 통계를 불러오는데 실패했습니다.')
-      setQuickStartData(null)
+      console.error('유저 타입 상세 조회 실패:', error)
+      message.error(error.message || '유저 타입 상세를 불러오는데 실패했습니다.')
+      setDetailData([])
     } finally {
       setLoading(false)
     }
   }
 
-  // AI 모드 이탈 통계 조회
-  const fetchAiModeDropoff = async () => {
-    setLoading(true)
-    try {
-      const { startDate, endDate } = getDateRange()
-      const data = await getAiModeDropoff(startDate, endDate)
-      setAiModeData(data)
-    } catch (error) {
-      console.error('AI 모드 이탈 통계 조회 실패:', error)
-      message.error(error.message || 'AI 모드 이탈 통계를 불러오는데 실패했습니다.')
-      setAiModeData(null)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const handleTabChange = (key) => setActiveTab(key)
 
-  // 카테고리별 조회 통계
-  const fetchCategoryViewStats = async () => {
-    setLoading(true)
-    try {
-      const { startDate, endDate } = getDateRange()
-      const data = await getCategoryViewStats(startDate, endDate)
-      setCategoryData(data)
-    } catch (error) {
-      console.error('카테고리별 조회 통계 실패:', error)
-      message.error(error.message || '카테고리별 조회 통계를 불러오는데 실패했습니다.')
-      setCategoryData(null)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const handleFetchStats = () => fetchStats()
+  const handleFetchDetail = () => fetchDetail()
 
-  // 활성 탭에 따라 데이터 조회
-  const fetchDataByTab = () => {
-    switch (activeTab) {
-      case 'mode-selection':
-        fetchModeSelectionStats()
-        break
-      case 'quick-start':
-        fetchQuickStartDropoff()
-        break
-      case 'ai-mode':
-        fetchAiModeDropoff()
-        break
-      case 'category':
-        fetchCategoryViewStats()
-        break
-      default:
-        break
-    }
-  }
-
-  // 날짜 범위 변경 핸들러
-  const handleDateRangeChange = (dates) => {
-    if (dates && dates.length === 2) {
-      setDateRange(dates)
-    }
-  }
-
-  // 탭 변경 핸들러
-  const handleTabChange = (key) => {
-    setActiveTab(key)
-  }
-
-  // 조회 버튼 클릭
-  const handleFetch = () => {
-    fetchDataByTab()
-  }
-
-  // 초기 로드
   useEffect(() => {
-    fetchModeSelectionStats()
+    fetchStats()
   }, [])
 
-  // 탭 변경 시 데이터 조회 (데이터가 없는 경우에만)
   useEffect(() => {
-    if (activeTab === 'quick-start' && !quickStartData) {
-      fetchQuickStartDropoff()
-    } else if (activeTab === 'ai-mode' && !aiModeData) {
-      fetchAiModeDropoff()
-    } else if (activeTab === 'category' && !categoryData) {
-      fetchCategoryViewStats()
+    if (activeTab === 'detail') {
+      fetchDetail()
     }
   }, [activeTab])
 
-  // 스텝 이름 한글화
-  const getStepNameKo = (stepName) => {
-    const stepMap = {
-      welcome_shown: '환영 화면',
-      mode_selected: '모드 선택',
-      category_selected: '카테고리 선택',
-      category_completed: '카테고리 완료',
-      category_carousel_viewed: '카테고리 캐러셀 조회',
-      study_level_selected: '학습 수준 선택',
-      quest_highlight_shown: '퀘스트 하이라이트',
-      purchase_shown: '구매 화면',
-      completed: '완료',
-    }
-    return stepMap[stepName] || stepName
-  }
-
-  // 퀵스타트 이탈 테이블 컬럼
-  const quickStartColumns = [
-    {
-      title: '순서',
-      dataIndex: 'step_order',
-      key: 'step_order',
-      width: 80,
-      align: 'center',
-    },
+  const statsColumns = [
     {
       title: '스텝',
-      dataIndex: 'step_name',
-      key: 'step_name',
-      width: 200,
-      render: (name) => getStepNameKo(name),
+      dataIndex: 'current_step_id',
+      key: 'current_step_id',
+      width: 160,
+      render: (val, record) => getStepLabel(val, record.is_completed),
     },
     {
-      title: '이탈 유저수',
-      dataIndex: 'user_count',
-      key: 'user_count',
-      width: 150,
-      align: 'right',
-      render: (count) => count.toLocaleString(),
-    },
-    {
-      title: '누적 이탈 유저수',
-      dataIndex: 'cumulative_count',
-      key: 'cumulative_count',
-      width: 150,
-      align: 'right',
-      render: (count) => count.toLocaleString(),
-    },
-    {
-      title: '이탈률',
-      key: 'dropoff_rate',
-      width: 200,
-      render: (_, record) => {
-        const rate = quickStartData?.total_users > 0
-          ? (record.cumulative_count / quickStartData.total_users) * 100
-          : 0
-        return (
-          <Progress
-            percent={rate.toFixed(2)}
-            strokeColor={rate > 20 ? '#ff4d4f' : rate > 10 ? '#faad14' : '#52c41a'}
-            format={(percent) => `${percent}%`}
-          />
-        )
-      },
-    },
-  ]
-
-  // AI 모드 이탈 테이블 컬럼
-  const aiModeColumns = [
-    {
-      title: '순서',
-      dataIndex: 'step_order',
-      key: 'step_order',
-      width: 80,
+      title: '완료 여부',
+      dataIndex: 'is_completed',
+      key: 'is_completed',
+      width: 100,
       align: 'center',
+      render: (val) => (
+        <Tag color={val === 1 ? 'green' : 'orange'}>
+          {val === 1 ? '완료' : '진행 중'}
+        </Tag>
+      ),
     },
     {
-      title: '스텝',
-      dataIndex: 'step_name',
-      key: 'step_name',
-      width: 200,
-      render: (name) => getStepNameKo(name),
-    },
-    {
-      title: '이탈 유저수',
-      dataIndex: 'user_count',
-      key: 'user_count',
-      width: 150,
-      align: 'right',
-      render: (count) => count.toLocaleString(),
-    },
-    {
-      title: '누적 이탈 유저수',
-      dataIndex: 'cumulative_count',
-      key: 'cumulative_count',
-      width: 150,
-      align: 'right',
-      render: (count) => count.toLocaleString(),
-    },
-    {
-      title: '이탈률',
-      key: 'dropoff_rate',
-      width: 200,
-      render: (_, record) => {
-        const rate = aiModeData?.total_users > 0
-          ? (record.cumulative_count / aiModeData.total_users) * 100
-          : 0
-        return (
-          <Progress
-            percent={rate.toFixed(2)}
-            strokeColor={rate > 20 ? '#ff4d4f' : rate > 10 ? '#faad14' : '#52c41a'}
-            format={(percent) => `${percent}%`}
-          />
-        )
-      },
-    },
-  ]
-
-  // 카테고리 조회 테이블 컬럼
-  const categoryColumns = [
-    {
-      title: '카테고리 ID',
-      dataIndex: 'category_id',
-      key: 'category_id',
-      width: 120,
-      align: 'center',
-    },
-    {
-      title: '카테고리 코드',
-      dataIndex: 'category_code',
-      key: 'category_code',
-      width: 200,
-    },
-    {
-      title: '카테고리명',
-      key: 'title',
-      width: 300,
-      render: (_, record) => {
-        const titleI18n = record.title_i18n
-        if (typeof titleI18n === 'object' && titleI18n.ko) {
-          return titleI18n.ko
-        } else if (typeof titleI18n === 'string') {
-          try {
-            const parsed = JSON.parse(titleI18n)
-            return parsed.ko || titleI18n
-          } catch {
-            return titleI18n
-          }
+      title: '유저 타입',
+      dataIndex: 'user_type',
+      key: 'user_type',
+      width: 130,
+      render: (val) => {
+        const colorMap = {
+          PAID_USER: 'blue',
+          PROMOTION_USER: 'purple',
+          IN_PROGRESS: 'default',
         }
-        return '-'
-      },
-    },
-    {
-      title: '조회 유저수',
-      dataIndex: 'user_count',
-      key: 'user_count',
-      width: 150,
-      align: 'right',
-      render: (count) => count.toLocaleString(),
-    },
-    {
-      title: '조회 비율',
-      key: 'view_rate',
-      width: 200,
-      render: (_, record) => {
-        const rate = categoryData?.total_views > 0
-          ? (record.user_count / categoryData.total_views) * 100
-          : 0
         return (
-          <Progress
-            percent={rate.toFixed(2)}
-            format={(percent) => `${percent}%`}
-          />
+          <Tag color={colorMap[val] || 'default'}>
+            {USER_TYPE_MAP[val] ?? val}
+          </Tag>
         )
       },
     },
     {
-      title: '표시 순서',
-      dataIndex: 'display_order',
-      key: 'display_order',
-      width: 120,
-      align: 'center',
+      title: '유저 수',
+      dataIndex: 'user_count',
+      key: 'user_count',
+      width: 100,
+      align: 'right',
+      render: (count) => count?.toLocaleString() ?? 0,
     },
   ]
+
+  const detailColumns = [
+    {
+      title: '활성 일자',
+      dataIndex: 'active_date',
+      key: 'active_date',
+      width: 120,
+    },
+    {
+      title: '유저 ID',
+      dataIndex: 'user_id',
+      key: 'user_id',
+      width: 100,
+    },
+    {
+      title: '스텝',
+      dataIndex: 'current_step_id',
+      key: 'current_step_id',
+      width: 140,
+      render: (val, record) => getStepLabel(val, record.is_completed),
+    },
+    {
+      title: '완료 여부',
+      dataIndex: 'is_completed',
+      key: 'is_completed',
+      width: 100,
+      align: 'center',
+      render: (val) => (
+        <Tag color={val ? 'green' : 'orange'}>
+          {val ? '완료' : '진행 중/이탈'}
+        </Tag>
+      ),
+    },
+    {
+      title: '유저 타입',
+      dataIndex: 'user_type',
+      key: 'user_type',
+      width: 130,
+      render: (val) => {
+        const colorMap = {
+          PAID_USER: 'blue',
+          PROMOTION_USER: 'purple',
+          IN_PROGRESS: 'default',
+        }
+        return (
+          <Tag color={colorMap[val] || 'default'}>
+            {USER_TYPE_MAP[val] ?? val}
+          </Tag>
+        )
+      },
+    },
+  ]
+
+  const totalStatsUsers = statsData.reduce((sum, row) => sum + (row.user_count || 0), 0)
+  const paidCount = statsData
+    .filter((r) => r.user_type === 'PAID_USER')
+    .reduce((sum, r) => sum + (r.user_count || 0), 0)
+  const promotionCount = statsData
+    .filter((r) => r.user_type === 'PROMOTION_USER')
+    .reduce((sum, r) => sum + (r.user_count || 0), 0)
+  const completedCount = paidCount + promotionCount
+  const inProgressCount = statsData
+    .filter((r) => r.user_type === 'IN_PROGRESS')
+    .reduce((sum, r) => sum + (r.user_count || 0), 0)
+
+  const dropoffByStep = statsData
+    .filter((r) => r.user_type === 'IN_PROGRESS')
+    .reduce((acc, r) => {
+      const stepId = r.current_step_id ?? 'unknown'
+      acc[stepId] = (acc[stepId] || 0) + (r.user_count || 0)
+      return acc
+    }, {})
+  const dropoffList = Object.entries(dropoffByStep)
+    .map(([stepId, count]) => ({
+      stepId,
+      count,
+      pct: inProgressCount > 0 ? (count / inProgressCount) * 100 : 0,
+    }))
+    .sort((a, b) => b.count - a.count)
 
   return (
     <div className="onboarding-analytics">
       <Card>
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 16,
+            }}
+          >
             <Title level={2} style={{ margin: 0 }}>
-              📊 온보딩 지표 분석
+              온보딩 지표 분석
             </Title>
-            <Space>
-              <RangePicker
-                value={dateRange}
-                onChange={handleDateRangeChange}
-                format="YYYY-MM-DD"
-                disabledDate={(current) => current && current > dayjs().endOf('day')}
-              />
-              <Button
-                type="primary"
-                icon={<ReloadOutlined />}
-                onClick={handleFetch}
-                loading={loading}
-              >
-                조회
-              </Button>
-            </Space>
           </div>
 
           <Tabs activeKey={activeTab} onChange={handleTabChange}>
-            {/* 모드 선택 통계 */}
-            <TabPane tab="모드 선택 통계" key="mode-selection">
-              {loading && !modeSelectionData ? (
-                <div style={{ textAlign: 'center', padding: '50px' }}>
-                  <Spin size="large" />
-                  <div style={{ marginTop: 16 }}>데이터 불러오는 중...</div>
+            <Tabs.TabPane
+              tab={
+                <span>
+                  <BarChartOutlined />
+                  통계
+                </span>
+              }
+              key="stats"
+            >
+              <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <RangePicker
+                    value={dateRange}
+                    onChange={(dates) => dates && setDateRange(dates)}
+                    format="YYYY-MM-DD"
+                    disabledDate={(current) => current && current > dayjs().endOf('day')}
+                  />
+                  <Button
+                    type="primary"
+                    icon={<ReloadOutlined />}
+                    onClick={handleFetchStats}
+                    loading={loading}
+                  >
+                    조회
+                  </Button>
                 </div>
-              ) : modeSelectionData ? (
-                <Space direction="vertical" size="large" style={{ width: '100%' }}>
-                  <Row gutter={16}>
-                    <Col span={6}>
-                      <Card>
-                        <Statistic
-                          title="전체 선택 인원수"
-                          value={modeSelectionData.total_count || 0}
-                          valueStyle={{ color: '#1890ff' }}
-                        />
-                      </Card>
-                    </Col>
-                    <Col span={6}>
-                      <Card>
-                        <Statistic
-                          title="AI 모드 선택"
-                          value={modeSelectionData.ai_mode_count || 0}
-                          valueStyle={{ color: '#52c41a' }}
-                          suffix={`(${((modeSelectionData.ai_mode_ratio || 0) * 100).toFixed(1)}%)`}
-                        />
-                      </Card>
-                    </Col>
-                    <Col span={6}>
-                      <Card>
-                        <Statistic
-                          title="퀵스타트 선택"
-                          value={modeSelectionData.quick_start_count || 0}
-                          valueStyle={{ color: '#faad14' }}
-                          suffix={`(${((modeSelectionData.quick_start_ratio || 0) * 100).toFixed(1)}%)`}
-                        />
-                      </Card>
-                    </Col>
-                    <Col span={6}>
-                      <Card>
-                        <Statistic
-                          title="완료율"
-                          value={((modeSelectionData.total_count > 0 ? 1 : 0) * 100).toFixed(1)}
-                          valueStyle={{ color: '#722ed1' }}
-                          suffix="%"
-                        />
-                      </Card>
-                    </Col>
-                  </Row>
 
-                  <Card title="모드 선택 비율">
+                {loading && statsData.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '50px' }}>
+                    <Spin size="large" />
+                    <div style={{ marginTop: 16 }}>데이터 불러오는 중...</div>
+                  </div>
+                ) : (
+                  <>
                     <Row gutter={16}>
-                      <Col span={12}>
-                        <div style={{ marginBottom: 16 }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                            <span>AI 모드</span>
-                            <span>{((modeSelectionData.ai_mode_ratio || 0) * 100).toFixed(2)}%</span>
-                          </div>
-                          <Progress
-                            percent={(modeSelectionData.ai_mode_ratio || 0) * 100}
-                            strokeColor="#52c41a"
+                      <Col xs={24} md={8}>
+                        <Card>
+                          <Statistic
+                            title="총 유저 수"
+                            value={totalStatsUsers}
+                            valueStyle={{ color: '#1890ff' }}
                           />
-                        </div>
+                        </Card>
                       </Col>
-                      <Col span={12}>
-                        <div style={{ marginBottom: 16 }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                            <span>퀵스타트</span>
-                            <span>{((modeSelectionData.quick_start_ratio || 0) * 100).toFixed(2)}%</span>
-                          </div>
-                          <Progress
-                            percent={(modeSelectionData.quick_start_ratio || 0) * 100}
-                            strokeColor="#faad14"
+                      <Col xs={24} md={8}>
+                        <Card>
+                          <Statistic
+                            title="완료 유저"
+                            value={completedCount}
+                            valueStyle={{ color: '#52c41a' }}
                           />
-                        </div>
+                          <div style={{ marginTop: 12, paddingLeft: 8, borderLeft: '3px solid #d9d9d9' }}>
+                            <div style={{ fontSize: 13, color: '#595959' }}>
+                              멤버십 전환 유저 <strong>{paidCount.toLocaleString()}</strong>
+                            </div>
+                            <div style={{ fontSize: 13, color: '#595959', marginTop: 4 }}>
+                              프로모션 멤버십 유저 <strong>{promotionCount.toLocaleString()}</strong>
+                            </div>
+                          </div>
+                        </Card>
+                      </Col>
+                      <Col xs={24} md={8}>
+                        <Card>
+                          <Statistic
+                            title="진행중 (이탈)"
+                            value={inProgressCount}
+                            valueStyle={{ color: '#faad14' }}
+                          />
+                          {dropoffList.length > 0 && (
+                            <div style={{ marginTop: 12 }}>
+                              {dropoffList.map(({ stepId, count, pct }) => (
+                                <div key={stepId} style={{ marginBottom: 8 }}>
+                                  <div
+                                    style={{
+                                      fontSize: 13,
+                                      color: '#595959',
+                                      marginBottom: 2,
+                                      display: 'flex',
+                                      justifyContent: 'space-between',
+                                    }}
+                                  >
+                                    <span>{getStepLabel(stepId, 0)}</span>
+                                    <span>
+                                      {count.toLocaleString()}명 ({pct.toFixed(1)}%)
+                                    </span>
+                                  </div>
+                                  <Progress
+                                    percent={pct}
+                                    size="small"
+                                    showInfo={false}
+                                    strokeColor="#faad14"
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </Card>
                       </Col>
                     </Row>
-                  </Card>
-                </Space>
-              ) : (
-                <div style={{ textAlign: 'center', padding: '50px', color: '#8c8c8c' }}>
-                  데이터가 없습니다. 날짜 범위를 선택하고 조회 버튼을 클릭하세요.
-                </div>
-              )}
-            </TabPane>
 
-            {/* 퀵스타트 이탈 분석 */}
-            <TabPane tab="퀵스타트 이탈 분석" key="quick-start">
-              {loading && !quickStartData ? (
-                <div style={{ textAlign: 'center', padding: '50px' }}>
-                  <Spin size="large" />
-                  <div style={{ marginTop: 16 }}>데이터 불러오는 중...</div>
-                </div>
-              ) : quickStartData ? (
-                <Space direction="vertical" size="large" style={{ width: '100%' }}>
-                  <Row gutter={16}>
-                    <Col span={8}>
-                      <Card>
-                        <Statistic
-                          title="전체 유저수"
-                          value={quickStartData.total_users || 0}
-                          valueStyle={{ color: '#1890ff' }}
-                        />
-                      </Card>
-                    </Col>
-                    <Col span={8}>
-                      <Card>
-                        <Statistic
-                          title="완료 유저수"
-                          value={quickStartData.completed_users || 0}
-                          valueStyle={{ color: '#52c41a' }}
-                        />
-                      </Card>
-                    </Col>
-                    <Col span={8}>
-                      <Card>
-                        <Statistic
-                          title="완료율"
-                          value={quickStartData.total_users > 0
-                            ? ((quickStartData.completed_users / quickStartData.total_users) * 100).toFixed(1)
-                            : 0}
-                          valueStyle={{ color: '#722ed1' }}
-                          suffix="%"
-                        />
-                      </Card>
-                    </Col>
-                  </Row>
+                    {(() => {
+                      const byDate = statsData.reduce((acc, row) => {
+                        const d = row.active_date
+                        if (!acc[d]) acc[d] = []
+                        acc[d].push(row)
+                        return acc
+                      }, {})
+                      const dates = Object.keys(byDate).sort()
+                      return dates.map((date) => (
+                        <Card key={date} title={date} style={{ marginBottom: 16 }}>
+                          <Table
+                            columns={statsColumns}
+                            dataSource={byDate[date]}
+                            rowKey={(_, i) => `${date}-${_.current_step_id}-${_.user_type}-${_.is_completed}-${i}`}
+                            pagination={false}
+                            scroll={{ x: 600 }}
+                          />
+                        </Card>
+                      ))
+                    })()}
+                  </>
+                )}
+              </Space>
+            </Tabs.TabPane>
 
-                  <Card title="스텝별 이탈 통계">
-                    <Table
-                      columns={quickStartColumns}
-                      dataSource={quickStartData.dropoff_by_step || []}
-                      rowKey="step_order"
-                      pagination={false}
-                      scroll={{ x: 800 }}
-                    />
-                  </Card>
-                </Space>
-              ) : (
-                <div style={{ textAlign: 'center', padding: '50px', color: '#8c8c8c' }}>
-                  데이터가 없습니다. 날짜 범위를 선택하고 조회 버튼을 클릭하세요.
+            <Tabs.TabPane
+              tab={
+                <span>
+                  <UnorderedListOutlined />
+                  일자별 상세
+                </span>
+              }
+              key="detail"
+            >
+              <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <DatePicker
+                    value={detailDate}
+                    onChange={(d) => d && setDetailDate(d)}
+                    format="YYYY-MM-DD"
+                    disabledDate={(current) => current && current > dayjs().endOf('day')}
+                  />
+                  <Button
+                    type="primary"
+                    icon={<ReloadOutlined />}
+                    onClick={handleFetchDetail}
+                    loading={loading}
+                  >
+                    조회
+                  </Button>
+                  <span style={{ color: '#8c8c8c', fontSize: 13 }}>
+                    해당 일자에 갱신된 유저 중 완료/이탈 스텝
+                  </span>
                 </div>
-              )}
-            </TabPane>
 
-            {/* AI 모드 이탈 분석 */}
-            <TabPane tab="AI 모드 이탈 분석" key="ai-mode">
-              {loading && !aiModeData ? (
-                <div style={{ textAlign: 'center', padding: '50px' }}>
-                  <Spin size="large" />
-                  <div style={{ marginTop: 16 }}>데이터 불러오는 중...</div>
-                </div>
-              ) : aiModeData ? (
-                <Space direction="vertical" size="large" style={{ width: '100%' }}>
-                  <Row gutter={16}>
-                    <Col span={8}>
-                      <Card>
-                        <Statistic
-                          title="전체 유저수"
-                          value={aiModeData.total_users || 0}
-                          valueStyle={{ color: '#1890ff' }}
-                        />
-                      </Card>
-                    </Col>
-                    <Col span={8}>
-                      <Card>
-                        <Statistic
-                          title="완료 유저수"
-                          value={aiModeData.completed_users || 0}
-                          valueStyle={{ color: '#52c41a' }}
-                        />
-                      </Card>
-                    </Col>
-                    <Col span={8}>
-                      <Card>
-                        <Statistic
-                          title="완료율"
-                          value={aiModeData.total_users > 0
-                            ? ((aiModeData.completed_users / aiModeData.total_users) * 100).toFixed(1)
-                            : 0}
-                          valueStyle={{ color: '#722ed1' }}
-                          suffix="%"
-                        />
-                      </Card>
-                    </Col>
-                  </Row>
-
-                  <Card title="스텝별 이탈 통계">
-                    <Table
-                      columns={aiModeColumns}
-                      dataSource={aiModeData.dropoff_by_step || []}
-                      rowKey="step_order"
-                      pagination={false}
-                      scroll={{ x: 800 }}
-                    />
-                  </Card>
-                </Space>
-              ) : (
-                <div style={{ textAlign: 'center', padding: '50px', color: '#8c8c8c' }}>
-                  데이터가 없습니다. 날짜 범위를 선택하고 조회 버튼을 클릭하세요.
-                </div>
-              )}
-            </TabPane>
-
-            {/* 카테고리별 조회 통계 */}
-            <TabPane tab="카테고리별 조회 통계" key="category">
-              {loading && !categoryData ? (
-                <div style={{ textAlign: 'center', padding: '50px' }}>
-                  <Spin size="large" />
-                  <div style={{ marginTop: 16 }}>데이터 불러오는 중...</div>
-                </div>
-              ) : categoryData ? (
-                <Space direction="vertical" size="large" style={{ width: '100%' }}>
-                  <Row gutter={16}>
-                    <Col span={24}>
-                      <Card>
-                        <Statistic
-                          title="총 조회수"
-                          value={categoryData.total_views || 0}
-                          valueStyle={{ color: '#1890ff' }}
-                          suffix="명"
-                        />
-                      </Card>
-                    </Col>
-                  </Row>
-
-                  <Card title="카테고리별 조회 통계">
-                    <Table
-                      columns={categoryColumns}
-                      dataSource={categoryData.categories || []}
-                      rowKey="category_id"
-                      pagination={{
-                        pageSize: 20,
-                        showSizeChanger: true,
-                        showTotal: (total) => `총 ${total}개 카테고리`,
-                      }}
-                      scroll={{ x: 1000 }}
-                    />
-                  </Card>
-                </Space>
-              ) : (
-                <div style={{ textAlign: 'center', padding: '50px', color: '#8c8c8c' }}>
-                  데이터가 없습니다. 날짜 범위를 선택하고 조회 버튼을 클릭하세요.
-                </div>
-              )}
-            </TabPane>
+                {loading && detailData.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '50px' }}>
+                    <Spin size="large" />
+                    <div style={{ marginTop: 16 }}>데이터 불러오는 중...</div>
+                  </div>
+                ) : (
+                  <>
+                    {(() => {
+                      const totalDetail = detailData.length
+                      const detailPaid = detailData.filter((r) => r.user_type === 'PAID_USER').length
+                      const detailPromo =
+                        detailData.filter((r) => r.user_type === 'PROMOTION_USER').length
+                      const detailCompleted = detailPaid + detailPromo
+                      const detailInProgress =
+                        detailData.filter((r) => r.user_type === 'IN_PROGRESS').length
+                      const detailDropoff = detailData
+                        .filter((r) => r.user_type === 'IN_PROGRESS')
+                        .reduce((acc, r) => {
+                          const stepId = r.current_step_id ?? 'unknown'
+                          acc[stepId] = (acc[stepId] || 0) + 1
+                          return acc
+                        }, {})
+                      const detailDropoffList = Object.entries(detailDropoff)
+                        .map(([stepId, count]) => ({
+                          stepId,
+                          count,
+                          pct: detailInProgress > 0 ? (count / detailInProgress) * 100 : 0,
+                        }))
+                        .sort((a, b) => b.count - a.count)
+                      return (
+                        <Row gutter={16} style={{ marginBottom: 16 }}>
+                          <Col xs={24} md={8}>
+                            <Card>
+                              <Statistic
+                                title="총 유저 수"
+                                value={totalDetail}
+                                valueStyle={{ color: '#1890ff' }}
+                              />
+                            </Card>
+                          </Col>
+                          <Col xs={24} md={8}>
+                            <Card>
+                              <Statistic
+                                title="완료 유저"
+                                value={detailCompleted}
+                                valueStyle={{ color: '#52c41a' }}
+                              />
+                              <div
+                                style={{
+                                  marginTop: 12,
+                                  paddingLeft: 8,
+                                  borderLeft: '3px solid #d9d9d9',
+                                }}
+                              >
+                                <div style={{ fontSize: 13, color: '#595959' }}>
+                                  멤버십 전환 유저 <strong>{detailPaid}</strong>
+                                </div>
+                                <div style={{ fontSize: 13, color: '#595959', marginTop: 4 }}>
+                                  프로모션 멤버십 유저 <strong>{detailPromo}</strong>
+                                </div>
+                              </div>
+                            </Card>
+                          </Col>
+                          <Col xs={24} md={8}>
+                            <Card>
+                              <Statistic
+                                title="진행중 (이탈)"
+                                value={detailInProgress}
+                                valueStyle={{ color: '#faad14' }}
+                              />
+                              {detailDropoffList.length > 0 && (
+                                <div style={{ marginTop: 12 }}>
+                                  {detailDropoffList.map(({ stepId, count, pct }) => (
+                                    <div key={stepId} style={{ marginBottom: 8 }}>
+                                      <div
+                                        style={{
+                                          fontSize: 13,
+                                          color: '#595959',
+                                          marginBottom: 2,
+                                          display: 'flex',
+                                          justifyContent: 'space-between',
+                                        }}
+                                      >
+                                        <span>{getStepLabel(stepId, false)}</span>
+                                        <span>
+                                          {count}명 ({pct.toFixed(1)}%)
+                                        </span>
+                                      </div>
+                                      <Progress
+                                        percent={pct}
+                                        size="small"
+                                        showInfo={false}
+                                        strokeColor="#faad14"
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </Card>
+                          </Col>
+                        </Row>
+                      )
+                    })()}
+                    <Card title={`${detailDate.format('YYYY-MM-DD')} 유저 상세`}>
+                      <Table
+                        columns={detailColumns}
+                        dataSource={detailData}
+                        rowKey={(r) => `${r.user_id}-${r.current_step_id}-${r.user_type}`}
+                        pagination={{
+                          pageSize: 20,
+                          showSizeChanger: true,
+                          showTotal: (total) => `총 ${total}명`,
+                        }}
+                        scroll={{ x: 600 }}
+                      />
+                    </Card>
+                  </>
+                )}
+              </Space>
+            </Tabs.TabPane>
           </Tabs>
         </Space>
       </Card>
