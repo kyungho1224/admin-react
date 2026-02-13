@@ -336,7 +336,7 @@ function OnboardingAnalytics() {
                         acc[d].push(row)
                         return acc
                       }, {})
-                      const dates = Object.keys(byDate).sort()
+                      const dates = Object.keys(byDate).sort((a, b) => b.localeCompare(a))
                       return dates.map((date) => (
                         <Card key={date} title={date} style={{ marginBottom: 16 }}>
                           <Table

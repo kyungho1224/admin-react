@@ -1,6 +1,8 @@
-import { Layout, Typography, Space, Avatar, Select, Tag, Button, Modal, Dropdown } from 'antd'
-import { UserOutlined, LogoutOutlined, ClockCircleOutlined, MenuOutlined, DownOutlined } from '@ant-design/icons'
+import { useState, useEffect } from 'react'
+import { Layout, Typography, Space, Avatar, Select, Tag, Button, Modal, Dropdown, Switch, message } from 'antd'
+import { UserOutlined, LogoutOutlined, ClockCircleOutlined, MenuOutlined, DownOutlined, GiftOutlined } from '@ant-design/icons'
 import { getApiConfig, setApiEnvironment } from '../../services/apiClient'
+import { getPromotionStatus, updatePromotionStatus } from '../../services/api'
 import { useAuth } from '../../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import './Header.css'
@@ -15,6 +17,43 @@ function Header({ isMobile = false, onMenuClick }) {
   const currentEnv = apiConfig.environment
   const { user, logout, sessionTimeLeft, canExtend, extendSession } = useAuth()
   const navigate = useNavigate()
+  const [isPromotionOn, setIsPromotionOn] = useState(false)
+  const [promotionLoading, setPromotionLoading] = useState(false)
+  const [promotionStatusLoading, setPromotionStatusLoading] = useState(true)
+
+  // 프로모션 상태 조회
+  useEffect(() => {
+    let cancelled = false
+    async function fetchStatus() {
+      try {
+        const data = await getPromotionStatus()
+        if (!cancelled && data && typeof data.is_promotion_on === 'boolean') {
+          setIsPromotionOn(data.is_promotion_on)
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error('[Header] 프로모션 상태 조회 실패:', err)
+        }
+      } finally {
+        if (!cancelled) setPromotionStatusLoading(false)
+      }
+    }
+    fetchStatus()
+    return () => { cancelled = true }
+  }, [])
+
+  const handlePromotionToggle = async (checked) => {
+    setPromotionLoading(true)
+    try {
+      await updatePromotionStatus(checked)
+      setIsPromotionOn(checked)
+      message.success(checked ? '프로모션이 켜졌습니다.' : '프로모션이 꺼졌습니다.')
+    } catch (err) {
+      message.error(err.message || '프로모션 상태 변경에 실패했습니다.')
+    } finally {
+      setPromotionLoading(false)
+    }
+  }
 
   // 세션 시간 포맷팅 (분:초)
   const formatSessionTime = (seconds) => {
@@ -86,6 +125,18 @@ function Header({ isMobile = false, onMenuClick }) {
       <div className="header-right">
         {!isMobile ? (
           <Space size="middle">
+            {!promotionStatusLoading && (
+              <Space size="small">
+                <GiftOutlined style={{ color: isPromotionOn ? '#52c41a' : '#8c8c8c' }} />
+                <span style={{ fontSize: '12px', color: '#8c8c8c' }}>프로모션</span>
+                <Switch
+                  size="small"
+                  checked={isPromotionOn}
+                  loading={promotionLoading}
+                  onChange={handlePromotionToggle}
+                />
+              </Space>
+            )}
             <Space size="small">
               <span style={{ fontSize: '12px', color: '#8c8c8c' }}>환경:</span>
               <Select
@@ -132,6 +183,17 @@ function Header({ isMobile = false, onMenuClick }) {
           </Space>
         ) : (
           <Space size="small">
+            {!promotionStatusLoading && (
+              <>
+                <GiftOutlined style={{ color: isPromotionOn ? '#52c41a' : '#8c8c8c', fontSize: 14 }} />
+                <Switch
+                  size="small"
+                  checked={isPromotionOn}
+                  loading={promotionLoading}
+                  onChange={handlePromotionToggle}
+                />
+              </>
+            )}
             <Tag color={currentEnv === 'production' ? 'red' : 'blue'} style={{ margin: 0 }}>
               {currentEnv === 'production' ? '운영' : '개발'}
             </Tag>
