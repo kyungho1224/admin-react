@@ -62,7 +62,11 @@ const IN_APP_ROUTES = [
   { value: 'K_LIFE_K_CREATOR', label: 'K-Life-링크플로러' },
   { value: 'WALLET', label: '지갑' },
   { value: 'PURCHASE_DETAIL', label: '결제-상세페이지' },
-  { value: 'NEW_YEAR_GOAL', label: '이벤트-새해 다짐' },
+  { value: 'MEMBERSHIP_BENEFIT', label: '멤버십 보상 메인' },
+  { value: 'MEMBERSHIP_REWARD_SIMPLE_VIEW', label: '멤버십 보상 - 상세 화면' },
+  { value: 'MEMBERSHIP_REWARD_HANGEUL_NOTE', label: '멤버십 보상 - 한글 쓰기 노트' },
+  { value: 'MEMBERSHIP_REWARD_TOPIK_NOTE', label: '멤버십 보상 - TOPIK 쓰기 노트' },
+  
 ]
 
 // 드래그 가능한 행 컴포넌트
