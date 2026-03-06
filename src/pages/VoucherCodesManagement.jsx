@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
   Card,
   Table,
@@ -41,11 +41,11 @@ function VoucherCodesManagement() {
   const [voucherItemsLoading, setVoucherItemsLoading] = useState(false)
   const [form] = Form.useForm()
 
-  const fetchList = async (cursor = null, append = false) => {
+  const fetchList = useCallback(async (cursor = null, append = false) => {
     setLoading(true)
     try {
       const res = await listVoucherCodes({
-        cursor: cursor ?? undefined,
+        cursor: cursor != null ? Number(cursor) : undefined,
         limit: 20,
         voucher_type: filters.voucher_type || undefined,
         is_active_flag: filters.is_active_flag,
@@ -58,7 +58,8 @@ function VoucherCodesManagement() {
       } else {
         setData(list)
       }
-      setPagination({ next_cursor: pag.next_cursor ?? null, has_more: !!pag.has_more })
+      const next = pag.next_cursor != null ? Number(pag.next_cursor) : null
+      setPagination({ next_cursor: next, has_more: !!pag.has_more })
     } catch (err) {
       console.error(err)
       message.error(err.message || '목록 조회에 실패했습니다.')
@@ -66,11 +67,11 @@ function VoucherCodesManagement() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filters.voucher_type, filters.is_active_flag, filters.sold])
 
   useEffect(() => {
     fetchList()
-  }, [filters.voucher_type, filters.is_active_flag, filters.sold])
+  }, [fetchList])
 
   const fetchVoucherItems = async (itemType) => {
     setVoucherItemsLoading(true)
@@ -156,9 +157,9 @@ function VoucherCodesManagement() {
 
   const columns = [
     { title: 'ID', dataIndex: 'voucher_code_id', key: 'voucher_code_id', width: 80 },
-    { title: '코드', dataIndex: 'code', key: 'code', ellipsis: true, render: (t) => <code style={{ fontSize: 12 }}>{t}</code> },
-    { title: '코드명', dataIndex: 'code_name', key: 'code_name', width: 120 },
-    { title: '타입', dataIndex: 'voucher_type', key: 'voucher_type', width: 100 },
+    { title: '코드', dataIndex: 'code', key: 'code', width: 90, ellipsis: true, render: (t) => <code style={{ fontSize: 12 }}>{t}</code> },
+    { title: '코드명', dataIndex: 'code_name', key: 'code_name', width: 200 },
+    { title: '타입', dataIndex: 'voucher_type', key: 'voucher_type', width: 140 },
     { title: '사용 한도', dataIndex: 'use_count_limit', key: 'use_count_limit', width: 90 },
     {
       title: '판매',
