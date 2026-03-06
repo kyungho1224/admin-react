@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Drawer } from 'antd'
-import { DashboardOutlined, NotificationOutlined, PictureOutlined, BarChartOutlined, PlayCircleOutlined, DatabaseOutlined, FileImageOutlined, LineChartOutlined, MessageOutlined, GlobalOutlined, MailOutlined, UserOutlined, BookOutlined, SettingOutlined } from '@ant-design/icons'
+import { DashboardOutlined, NotificationOutlined, PictureOutlined, BarChartOutlined, PlayCircleOutlined, DatabaseOutlined, FileImageOutlined, LineChartOutlined, MessageOutlined, GlobalOutlined, MailOutlined, UserOutlined, BookOutlined, SettingOutlined, GiftOutlined } from '@ant-design/icons'
 import './Sidebar.css'
 
 const { Sider } = Layout
@@ -12,10 +12,15 @@ const menuItems = [
   //   icon: <DashboardOutlined />,
   //   label: '대시보드',
   // },
+  // {
+  //   key: '/onboarding-analytics',
+  //   icon: <LineChartOutlined />,
+  //   label: '온보딩 지표 분석',
+  // },
   {
-    key: '/onboarding-analytics',
-    icon: <LineChartOutlined />,
-    label: '온보딩 지표 분석',
+    key: '/voucher-codes',
+    icon: <GiftOutlined />,
+    label: 'Founder Membership',
   },
   {
     key: '/popup',
@@ -190,6 +195,9 @@ function Sidebar({ isMobile = false, open = false, onClose }) {
     }
     if (path.startsWith('/active-user-stats')) {
       return ['/active-user-stats']
+    }
+    if (path.startsWith('/voucher-codes')) {
+      return ['/voucher-codes']
     }
     if (path.startsWith('/class-reservation')) {
       if (path.startsWith('/class-reservation/images')) {

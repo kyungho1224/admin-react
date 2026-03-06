@@ -17,6 +17,7 @@ import ChatManagement from './pages/ChatManagement'
 import StudyAbroad from './pages/StudyAbroad'
 import InAppMail from './pages/InAppMail'
 import ActiveUserStats from './pages/ActiveUserStats'
+import VoucherCodesManagement from './pages/VoucherCodesManagement'
 import ClassManagement from './pages/ClassManagement'
 import ReservationManagement from './pages/ReservationManagement'
 import ClassImageManagement from './pages/ClassImageManagement'
@@ -38,7 +39,7 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<Navigate to="/onboarding-analytics" replace />} />
+            <Route index element={<Navigate to="/voucher-codes" replace />} />
             <Route path="popup" element={<PopupManagement />} />
             <Route path="images" element={<ImageManagement />} />
             <Route path="banner" element={<BannerManagement />} />
@@ -48,6 +49,7 @@ function App() {
             <Route path="chat" element={<ChatManagement />} />
             <Route path="in-app-mail" element={<InAppMail />} />
             <Route path="active-user-stats" element={<ActiveUserStats />} />
+            <Route path="voucher-codes" element={<VoucherCodesManagement />} />
             <Route path="class-reservation/classes" element={<ClassManagement />} />
             <Route path="class-reservation/reservations" element={<ReservationManagement />} />
             <Route path="class-reservation/images" element={<ClassImageManagement />} />
