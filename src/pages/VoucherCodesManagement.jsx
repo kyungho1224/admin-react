@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import {
   Card,
   Table,
@@ -17,7 +17,7 @@ import {
   Col,
   DatePicker,
 } from 'antd'
-import { PlusOutlined, ReloadOutlined, GiftOutlined } from '@ant-design/icons'
+import { PlusOutlined, ReloadOutlined, GiftOutlined, ArrowUpOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { listVoucherCodes, createVoucherCodes, getVoucherItems } from '../services/api'
 import './VoucherCodesManagement.css'
@@ -39,7 +39,11 @@ function VoucherCodesManagement() {
   const [createMode, setCreateMode] = useState('single') // 'single' | 'batch'
   const [voucherItems, setVoucherItems] = useState([])
   const [voucherItemsLoading, setVoucherItemsLoading] = useState(false)
+  const [showBackToTop, setShowBackToTop] = useState(false)
   const [form] = Form.useForm()
+  const paginationRef = useRef(pagination)
+  const loadingRef = useRef(loading)
+  const fetchListRef = useRef(() => {})
 
   const fetchList = useCallback(async (cursor = null, append = false) => {
     setLoading(true)
@@ -69,8 +73,31 @@ function VoucherCodesManagement() {
     }
   }, [filters.voucher_type, filters.is_active_flag, filters.sold])
 
+  paginationRef.current = pagination
+  loadingRef.current = loading
+  fetchListRef.current = fetchList
+
   useEffect(() => {
     fetchList()
+  }, [fetchList])
+
+  // 스크롤 맨 아래 도달 시 자동 더 불러오기 + 맨 위로 버튼 표시
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = document.documentElement.scrollTop || document.body.scrollTop
+      const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight
+      const clientHeight = document.documentElement.clientHeight
+      const hasScroll = scrollHeight > clientHeight
+      setShowBackToTop(hasScroll && scrollTop > 200)
+      const { has_more, next_cursor } = paginationRef.current
+      if (!has_more || loadingRef.current) return
+      if (scrollTop + clientHeight >= scrollHeight - 150) {
+        fetchListRef.current?.(next_cursor, true)
+      }
+    }
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [fetchList])
 
   const fetchVoucherItems = async (itemType) => {
@@ -254,9 +281,22 @@ function VoucherCodesManagement() {
             <Button onClick={() => fetchList(pagination.next_cursor, true)} loading={loading}>
               더 불러오기
             </Button>
+            {loading && data.length > 0 && (
+              <div style={{ marginTop: 8, color: '#999', fontSize: 12 }}>추가 목록 불러오는 중...</div>
+            )}
           </div>
         )}
       </Card>
+
+      {showBackToTop && (
+        <Button
+          type="primary"
+          icon={<ArrowUpOutlined />}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="back-to-top-btn"
+          title="맨 위로"
+        />
+      )}
 
       <Modal
         title="바우처 코드 생성"
