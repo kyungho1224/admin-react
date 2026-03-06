@@ -22,7 +22,7 @@ import dayjs from 'dayjs'
 import { listVoucherCodes, createVoucherCodes, getVoucherItems } from '../services/api'
 import './VoucherCodesManagement.css'
 
-const { Title } = Typography
+const { Title, Text } = Typography
 const { Option } = Select
 
 function VoucherCodesManagement() {
@@ -129,7 +129,7 @@ function VoucherCodesManagement() {
       use_expired_flag: false,
       start_at: undefined,
       expired_at: undefined,
-      rewards: [{ item_id: undefined, item_cnt: 1, is_lifetime_membership: false }],
+      rewards: [{ item_id: undefined, item_cnt: 1, is_lifetime_membership: true }],
     })
     setCreateModalOpen(true)
     fetchVoucherItems()
@@ -187,7 +187,13 @@ function VoucherCodesManagement() {
     { title: '코드', dataIndex: 'code', key: 'code', width: 90, ellipsis: true, render: (t) => <code style={{ fontSize: 12 }}>{t}</code> },
     { title: '코드명', dataIndex: 'code_name', key: 'code_name', width: 200 },
     { title: '타입', dataIndex: 'voucher_type', key: 'voucher_type', width: 140 },
-    { title: '사용 한도', dataIndex: 'use_count_limit', key: 'use_count_limit', width: 90 },
+    {
+      title: '사용 한도',
+      dataIndex: 'use_count_limit',
+      key: 'use_count_limit',
+      width: 90,
+      render: (v) => (v === 0 ? <span style={{ color: '#999' }}>소진 완료</span> : v),
+    },
     {
       title: '판매',
       key: 'sold',
@@ -303,7 +309,7 @@ function VoucherCodesManagement() {
         open={createModalOpen}
         onCancel={() => setCreateModalOpen(false)}
         footer={null}
-        width={560}
+        width={720}
         destroyOnClose
       >
         <Form form={form} layout="vertical" onFinish={handleCreateSubmit} initialValues={{ use_count_limit: 1, is_active_flag: true, use_expired_flag: false }}>
@@ -329,6 +335,10 @@ function VoucherCodesManagement() {
           <Form.Item name="voucher_type" label="voucher_type" rules={[{ required: true, message: '타입을 입력하세요' }]}>
             <Input placeholder="예: PROMOTION" />
           </Form.Item>
+          <div style={{ marginTop: -8, marginBottom: 8, fontSize: 12, color: '#666' }}>
+            평생이용권 생성 시 반드시 <Text copyable style={{ fontFamily: 'monospace' }}>FounderMembership</Text> 입력
+          </div>
+          <br />
           <Form.Item name="use_count_limit" label="사용 한도 (1코드당 사용 횟수)" rules={[{ required: true }]}>
             <InputNumber min={1} style={{ width: '100%' }} />
           </Form.Item>
@@ -367,18 +377,25 @@ function VoucherCodesManagement() {
             </Select>
             <Button size="small" onClick={() => fetchVoucherItems()} loading={voucherItemsLoading}>목록 새로고침</Button>
           </Space>
-          <Form.List name="rewards" initialValue={[{ item_id: undefined, item_cnt: 1, is_lifetime_membership: false }]}>
+          <Form.List name="rewards" initialValue={[{ item_id: undefined, item_cnt: 1, is_lifetime_membership: true }]}>
             {(fields, { add, remove }) => (
               <>
                 {fields.map(({ key, name, ...rest }) => (
                   <Row key={key} gutter={8} align="middle" style={{ marginBottom: 8 }}>
-                    <Col span={10}>
-                      <Form.Item {...rest} name={[name, 'item_id']} rules={[{ required: true, message: '아이템 선택' }]}>
+                    <Col span={14}>
+                      <Form.Item
+                        {...rest}
+                        name={[name, 'item_id']}
+                        label="아이템"
+                        tooltip="지급할 보상 아이템을 선택하세요"
+                        rules={[{ required: true, message: '아이템 선택' }]}
+                      >
                         <Select
                           placeholder="아이템 선택"
                           showSearch
                           optionFilterProp="label"
                           loading={voucherItemsLoading}
+                          dropdownStyle={{ minWidth: 420 }}
                           options={voucherItems.map((it) => ({
                             value: it.item_id,
                             label: [it.item_id, it.item_type, it.label].filter(Boolean).join(' · ') || `item_id ${it.item_id}`,
@@ -387,22 +404,28 @@ function VoucherCodesManagement() {
                         />
                       </Form.Item>
                     </Col>
-                    <Col span={5}>
-                      <Form.Item {...rest} name={[name, 'item_cnt']}>
-                        <InputNumber placeholder="수량" min={1} style={{ width: '100%' }} />
+                    <Col span={4}>
+                      <Form.Item
+                        {...rest}
+                        name={[name, 'item_cnt']}
+                        label="수량"
+                        tooltip="해당 아이템을 유저에게 지급할 개수"
+                      >
+                        <InputNumber placeholder="1" min={1} style={{ width: '100%' }} />
                       </Form.Item>
                     </Col>
-                    <Col span={5}>
+                    <Col span={4}>
                       <Form.Item
                         {...rest}
                         name={[name, 'is_lifetime_membership']}
                         valuePropName="checked"
-                        tooltip="평생 멤버십 (plan 보상 시 만료 없음)"
+                        label="평생"
+                        tooltip="켜면 평생 멤버십(만료 없음), 끄면 기간 제한"
                       >
-                        <Switch checkedChildren="평생" unCheckedChildren="-" />
+                        <Switch checkedChildren="Y" unCheckedChildren="N" />
                       </Form.Item>
                     </Col>
-                    <Col span={4}>
+                    <Col span={2}>
                       <Button type="text" danger onClick={() => remove(name)}>
                         삭제
                       </Button>
@@ -412,7 +435,7 @@ function VoucherCodesManagement() {
                 <Form.Item>
                   <Button
                     type="dashed"
-                    onClick={() => add({ item_id: undefined, item_cnt: 1, is_lifetime_membership: false })}
+                    onClick={() => add({ item_id: undefined, item_cnt: 1, is_lifetime_membership: true })}
                     block
                   >
                     보상 항목 추가
