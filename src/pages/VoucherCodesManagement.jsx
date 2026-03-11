@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
   Card,
   Table,
@@ -16,6 +16,7 @@ import {
   Row,
   Col,
   DatePicker,
+  Descriptions,
 } from 'antd'
 import { PlusOutlined, ReloadOutlined, GiftOutlined, ArrowUpOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
@@ -27,8 +28,10 @@ const { Option } = Select
 
 function VoucherCodesManagement() {
   const [loading, setLoading] = useState(false)
-  const [data, setData] = useState([])
-  const [pagination, setPagination] = useState({ next_cursor: null, has_more: false })
+  const [pageList, setPageList] = useState([]) // [{ data, next_cursor, has_more }, ...]
+  const [currentPage, setCurrentPage] = useState(1)
+  const [detailModalOpen, setDetailModalOpen] = useState(false)
+  const [detailRecord, setDetailRecord] = useState(null)
   const [filters, setFilters] = useState({
     voucher_type: undefined,
     is_active_flag: undefined,
@@ -41,11 +44,7 @@ function VoucherCodesManagement() {
   const [voucherItemsLoading, setVoucherItemsLoading] = useState(false)
   const [showBackToTop, setShowBackToTop] = useState(false)
   const [form] = Form.useForm()
-  const paginationRef = useRef(pagination)
-  const loadingRef = useRef(loading)
-  const fetchListRef = useRef(() => {})
-
-  const fetchList = useCallback(async (cursor = null, append = false) => {
+  const fetchList = useCallback(async (cursor = null, appendAsPage = false) => {
     setLoading(true)
     try {
       const res = await listVoucherCodes({
@@ -56,49 +55,53 @@ function VoucherCodesManagement() {
         sold: filters.sold,
       })
       const list = res?.data ?? []
-      const pag = res?.pagination ?? {}
-      if (append) {
-        setData((prev) => [...prev, ...list])
+      const next = res?.pagination?.next_cursor != null ? Number(res.pagination.next_cursor) : null
+      const has_more = !!res?.pagination?.has_more
+      if (appendAsPage) {
+        setPageList((prev) => [...prev, { data: list, next_cursor: next, has_more }])
+        setCurrentPage((prev) => prev + 1)
       } else {
-        setData(list)
+        setPageList([{ data: list, next_cursor: next, has_more }])
+        setCurrentPage(1)
       }
-      const next = pag.next_cursor != null ? Number(pag.next_cursor) : null
-      setPagination({ next_cursor: next, has_more: !!pag.has_more })
     } catch (err) {
       console.error(err)
       message.error(err.message || '목록 조회에 실패했습니다.')
-      if (!append) setData([])
+      if (!appendAsPage) setPageList([])
     } finally {
       setLoading(false)
     }
   }, [filters.voucher_type, filters.is_active_flag, filters.sold])
 
-  paginationRef.current = pagination
-  loadingRef.current = loading
-  fetchListRef.current = fetchList
-
   useEffect(() => {
     fetchList()
   }, [fetchList])
 
-  // 스크롤 맨 아래 도달 시 자동 더 불러오기 + 맨 위로 버튼 표시
+  const currentPageData = pageList[currentPage - 1]?.data ?? []
+  const currentPageInfo = pageList[currentPage - 1]
+  const hasNext = currentPageInfo?.has_more === true
+  const goPrev = () => setCurrentPage((p) => Math.max(1, p - 1))
+  const goNext = () => {
+    if (!currentPageInfo?.has_more || loading) return
+    if (pageList[currentPage]) {
+      setCurrentPage((p) => p + 1)
+    } else {
+      fetchList(currentPageInfo.next_cursor, true)
+    }
+  }
+
+  // 맨 위로 버튼 표시 (스크롤 시)
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = document.documentElement.scrollTop || document.body.scrollTop
       const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight
       const clientHeight = document.documentElement.clientHeight
-      const hasScroll = scrollHeight > clientHeight
-      setShowBackToTop(hasScroll && scrollTop > 200)
-      const { has_more, next_cursor } = paginationRef.current
-      if (!has_more || loadingRef.current) return
-      if (scrollTop + clientHeight >= scrollHeight - 150) {
-        fetchListRef.current?.(next_cursor, true)
-      }
+      setShowBackToTop(scrollHeight > clientHeight && scrollTop > 200)
     }
     handleScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [fetchList])
+  }, [])
 
   const fetchVoucherItems = async (itemType) => {
     setVoucherItemsLoading(true)
@@ -185,15 +188,7 @@ function VoucherCodesManagement() {
   const columns = [
     { title: 'ID', dataIndex: 'voucher_code_id', key: 'voucher_code_id', width: 80 },
     { title: '코드', dataIndex: 'code', key: 'code', width: 90, ellipsis: true, render: (t) => <code style={{ fontSize: 12 }}>{t}</code> },
-    { title: '코드명', dataIndex: 'code_name', key: 'code_name', width: 200 },
     { title: '타입', dataIndex: 'voucher_type', key: 'voucher_type', width: 140 },
-    {
-      title: '사용 한도',
-      dataIndex: 'use_count_limit',
-      key: 'use_count_limit',
-      width: 90,
-      render: (v) => (v === 0 ? <span style={{ color: '#999' }}>소진 완료</span> : v),
-    },
     {
       title: '판매',
       key: 'sold',
@@ -201,25 +196,18 @@ function VoucherCodesManagement() {
       render: (_, r) => (r.sold_at ? <Tag color="blue">판매됨</Tag> : <Tag>미판매</Tag>),
     },
     {
-      title: '활성',
-      dataIndex: 'is_active_flag',
-      key: 'is_active_flag',
-      width: 70,
-      render: (v) => (v ? <Tag color="green">활성</Tag> : <Tag color="default">비활성</Tag>),
+      title: '판매일',
+      key: 'paid_at',
+      width: 110,
+      render: (_, r) => (r.paid_at ? dayjs(r.paid_at).format('YYYY-MM-DD HH:mm') : r.sold_at ? dayjs(r.sold_at).format('YYYY-MM-DD HH:mm') : '-'),
     },
     {
-      title: '시작일',
-      dataIndex: 'start_at',
-      key: 'start_at',
-      width: 110,
-      render: (v) => (v ? dayjs(v).format('YYYY-MM-DD') : '-'),
-    },
-    {
-      title: '종료일',
-      dataIndex: 'expired_at',
-      key: 'expired_at',
-      width: 110,
-      render: (v) => (v ? dayjs(v).format('YYYY-MM-DD') : '-'),
+      title: '주문ID',
+      dataIndex: 'order_id',
+      key: 'order_id',
+      width: 200,
+      ellipsis: true,
+      render: (v) => (v ? <span onClick={(e) => e.stopPropagation()}><Text copyable style={{ fontSize: 12 }}>{v}</Text></span> : '-'),
     },
   ]
 
@@ -276,22 +264,28 @@ function VoucherCodesManagement() {
         <Table
           style={{ marginTop: 16 }}
           loading={loading}
-          dataSource={data}
+          dataSource={currentPageData}
           columns={columns}
           rowKey="voucher_code_id"
           pagination={false}
-          scroll={{ x: 900 }}
+          scroll={{ x: 700 }}
+          onRow={(record) => ({
+            onClick: () => {
+              setDetailRecord(record)
+              setDetailModalOpen(true)
+            },
+            style: { cursor: 'pointer' },
+          })}
         />
-        {pagination.has_more && (
-          <div style={{ textAlign: 'center', marginTop: 16 }}>
-            <Button onClick={() => fetchList(pagination.next_cursor, true)} loading={loading}>
-              더 불러오기
-            </Button>
-            {loading && data.length > 0 && (
-              <div style={{ marginTop: 8, color: '#999', fontSize: 12 }}>추가 목록 불러오는 중...</div>
-            )}
-          </div>
-        )}
+        <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16 }}>
+          <Button disabled={currentPage <= 1} onClick={goPrev}>
+            이전
+          </Button>
+          <span style={{ minWidth: 80, textAlign: 'center' }}>페이지 {currentPage}</span>
+          <Button disabled={!hasNext || loading} onClick={goNext} loading={loading}>
+            다음
+          </Button>
+        </div>
       </Card>
 
       {showBackToTop && (
@@ -303,6 +297,45 @@ function VoucherCodesManagement() {
           title="맨 위로"
         />
       )}
+
+      <Modal
+        title="바우처 코드 상세"
+        open={detailModalOpen}
+        onCancel={() => { setDetailModalOpen(false); setDetailRecord(null) }}
+        footer={<Button onClick={() => { setDetailModalOpen(false); setDetailRecord(null) }}>닫기</Button>}
+        width={640}
+      >
+        {detailRecord && (
+          <Descriptions bordered column={1} size="small">
+            <Descriptions.Item label="ID">{detailRecord.voucher_code_id}</Descriptions.Item>
+            <Descriptions.Item label="코드"><code>{detailRecord.code}</code></Descriptions.Item>
+            <Descriptions.Item label="코드명">{detailRecord.code_name ?? '-'}</Descriptions.Item>
+            <Descriptions.Item label="타입">{detailRecord.voucher_type}</Descriptions.Item>
+            <Descriptions.Item label="사용 한도">{detailRecord.use_count_limit === 0 ? '소진 완료' : detailRecord.use_count_limit}</Descriptions.Item>
+            <Descriptions.Item label="판매">{detailRecord.sold_at ? <Tag color="blue">판매됨</Tag> : <Tag>미판매</Tag>}</Descriptions.Item>
+            <Descriptions.Item label="활성">{detailRecord.is_active_flag ? 'Y' : 'N'}</Descriptions.Item>
+            <Descriptions.Item label="만료일 사용">{detailRecord.use_expired_flag ? 'Y' : 'N'}</Descriptions.Item>
+            <Descriptions.Item label="시작일">{detailRecord.start_at ? dayjs(detailRecord.start_at).format('YYYY-MM-DD HH:mm') : '-'}</Descriptions.Item>
+            <Descriptions.Item label="종료일">{detailRecord.expired_at ? dayjs(detailRecord.expired_at).format('YYYY-MM-DD HH:mm') : '-'}</Descriptions.Item>
+            <Descriptions.Item label="주문ID">{detailRecord.order_id ?? '-'}</Descriptions.Item>
+            <Descriptions.Item label="결제금액">{detailRecord.amount != null ? `${Number(detailRecord.amount).toLocaleString()} ${detailRecord.currency || ''}`.trim() : '-'}</Descriptions.Item>
+            <Descriptions.Item label="유입경로">{detailRecord.source ?? '-'}</Descriptions.Item>
+            <Descriptions.Item label="결제일(paid_at)">{detailRecord.paid_at ? dayjs(detailRecord.paid_at).format('YYYY-MM-DD HH:mm:ss') : '-'}</Descriptions.Item>
+            <Descriptions.Item label="판매일(sold_at)">{detailRecord.sold_at ? dayjs(detailRecord.sold_at).format('YYYY-MM-DD HH:mm:ss') : '-'}</Descriptions.Item>
+            <Descriptions.Item label="생성일">{detailRecord.created_at ? dayjs(detailRecord.created_at).format('YYYY-MM-DD HH:mm:ss') : '-'}</Descriptions.Item>
+            <Descriptions.Item label="수정일">{detailRecord.updated_at ? dayjs(detailRecord.updated_at).format('YYYY-MM-DD HH:mm:ss') : '-'}</Descriptions.Item>
+            <Descriptions.Item label="보상">
+              {detailRecord.rewards?.length ? (
+                <ul style={{ margin: 0, paddingLeft: 18 }}>
+                  {detailRecord.rewards.map((r, i) => (
+                    <li key={i}>item_id: {r.item_id}, 수량: {r.item_cnt}, 평생: {r.is_lifetime_membership ? 'Y' : 'N'}</li>
+                  ))}
+                </ul>
+              ) : '-'}
+            </Descriptions.Item>
+          </Descriptions>
+        )}
+      </Modal>
 
       <Modal
         title="바우처 코드 생성"
