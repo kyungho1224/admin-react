@@ -187,8 +187,8 @@ function VoucherCodesManagement() {
 
   const columns = [
     { title: 'ID', dataIndex: 'voucher_code_id', key: 'voucher_code_id', width: 80 },
-    { title: '코드', dataIndex: 'code', key: 'code', width: 90, ellipsis: true, render: (t) => <code style={{ fontSize: 12 }}>{t}</code> },
-    { title: '타입', dataIndex: 'voucher_type', key: 'voucher_type', width: 140 },
+    { title: '코드', dataIndex: 'code', key: 'code', width: 78, ellipsis: true, render: (t) => <code style={{ fontSize: 12 }}>{t}</code> },
+    { title: '타입', dataIndex: 'voucher_type', key: 'voucher_type', width: 120 },
     {
       title: '판매',
       key: 'sold',
@@ -200,6 +200,13 @@ function VoucherCodesManagement() {
       key: 'paid_at',
       width: 110,
       render: (_, r) => (r.paid_at ? dayjs(r.paid_at).format('YYYY-MM-DD HH:mm') : r.sold_at ? dayjs(r.sold_at).format('YYYY-MM-DD HH:mm') : '-'),
+    },
+    {
+      title: '유입경로',
+      dataIndex: 'source',
+      key: 'source',
+      width: 90,
+      render: (v) => v || '-',
     },
     {
       title: '주문ID',
