@@ -18,6 +18,7 @@ import StudyAbroad from './pages/StudyAbroad'
 import InAppMail from './pages/InAppMail'
 import ActiveUserStats from './pages/ActiveUserStats'
 import VoucherCodesManagement from './pages/VoucherCodesManagement'
+import FounderMembershipSales from './pages/FounderMembershipSales'
 import ClassManagement from './pages/ClassManagement'
 import ReservationManagement from './pages/ReservationManagement'
 import ClassImageManagement from './pages/ClassImageManagement'
@@ -50,6 +51,7 @@ function App() {
             <Route path="in-app-mail" element={<InAppMail />} />
             <Route path="active-user-stats" element={<ActiveUserStats />} />
             <Route path="voucher-codes" element={<VoucherCodesManagement />} />
+            <Route path="voucher-codes/sales" element={<FounderMembershipSales />} />
             <Route path="class-reservation/classes" element={<ClassManagement />} />
             <Route path="class-reservation/reservations" element={<ReservationManagement />} />
             <Route path="class-reservation/images" element={<ClassImageManagement />} />

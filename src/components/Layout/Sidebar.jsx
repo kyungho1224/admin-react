@@ -18,9 +18,19 @@ const menuItems = [
   //   label: '온보딩 지표 분석',
   // },
   {
-    key: '/voucher-codes',
+    key: 'founder-membership',
     icon: <GiftOutlined />,
     label: 'Founder Membership',
+    children: [
+      {
+        key: '/voucher-codes',
+        label: '코드 목록',
+      },
+      {
+        key: '/voucher-codes/sales',
+        label: '유저별 판매 실적',
+      },
+    ],
   },
   {
     key: '/popup',
@@ -159,6 +169,9 @@ function Sidebar({ isMobile = false, open = false, onClose }) {
   const location = useLocation()
 
   const handleMenuClick = ({ key }) => {
+    if (key === 'founder-membership') {
+      return
+    }
     navigate(key)
     if (isMobile && onClose) {
       onClose()
@@ -195,6 +208,9 @@ function Sidebar({ isMobile = false, open = false, onClose }) {
     }
     if (path.startsWith('/active-user-stats')) {
       return ['/active-user-stats']
+    }
+    if (path.startsWith('/voucher-codes/sales')) {
+      return ['/voucher-codes/sales']
     }
     if (path.startsWith('/voucher-codes')) {
       return ['/voucher-codes']
@@ -236,6 +252,9 @@ function Sidebar({ isMobile = false, open = false, onClose }) {
     if (path.startsWith('/class-reservation')) {
       openKeys.push('/class-reservation')
     }
+    if (path.startsWith('/voucher-codes')) {
+      openKeys.push('founder-membership')
+    }
     return openKeys
   }
 
@@ -248,7 +267,7 @@ function Sidebar({ isMobile = false, open = false, onClose }) {
         theme="dark"
         mode="inline"
         selectedKeys={getSelectedKeys()}
-        defaultOpenKeys={getOpenKeys()}
+        openKeys={getOpenKeys()}
         items={menuItems}
         onClick={handleMenuClick}
       />
