@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Drawer } from 'antd'
 import { DashboardOutlined, NotificationOutlined, PictureOutlined, BarChartOutlined, PlayCircleOutlined, DatabaseOutlined, FileImageOutlined, LineChartOutlined, MessageOutlined, GlobalOutlined, MailOutlined, UserOutlined, BookOutlined, SettingOutlined, GiftOutlined } from '@ant-design/icons'
@@ -233,30 +234,22 @@ function Sidebar({ isMobile = false, open = false, onClose }) {
     return [path]
   }
 
-  // 열려있는 서브메뉴 키 결정
-  const getOpenKeys = () => {
+  const [userOpenKeys, setUserOpenKeys] = useState([])
+  const pathOpenKeys = useMemo(() => {
     const path = location.pathname
-    const openKeys = []
-    if (path.startsWith('/popup') || path.startsWith('/images')) {
-      openKeys.push('/popup')
-    }
-    if (path.startsWith('/banner')) {
-      openKeys.push('/banner')
-    }
-    if (path.startsWith('/games')) {
-      openKeys.push('/games')
-    }
-    if (path.startsWith('/k-life')) {
-      openKeys.push('/k-life')
-    }
-    if (path.startsWith('/class-reservation')) {
-      openKeys.push('/class-reservation')
-    }
-    if (path.startsWith('/voucher-codes')) {
-      openKeys.push('founder-membership')
-    }
-    return openKeys
-  }
+    const keys = []
+    if (path.startsWith('/popup') || path.startsWith('/images')) keys.push('/popup')
+    if (path.startsWith('/banner')) keys.push('/banner')
+    if (path.startsWith('/games')) keys.push('/games')
+    if (path.startsWith('/k-life')) keys.push('/k-life')
+    if (path.startsWith('/class-reservation')) keys.push('/class-reservation')
+    if (path.startsWith('/voucher-codes')) keys.push('founder-membership')
+    return keys
+  }, [location.pathname])
+  const openKeys = useMemo(
+    () => [...new Set([...pathOpenKeys, ...userOpenKeys])],
+    [pathOpenKeys, userOpenKeys]
+  )
 
   const menuContent = (
     <>
@@ -267,7 +260,8 @@ function Sidebar({ isMobile = false, open = false, onClose }) {
         theme="dark"
         mode="inline"
         selectedKeys={getSelectedKeys()}
-        openKeys={getOpenKeys()}
+        openKeys={openKeys}
+        onOpenChange={(keys) => setUserOpenKeys(keys)}
         items={menuItems}
         onClick={handleMenuClick}
       />
