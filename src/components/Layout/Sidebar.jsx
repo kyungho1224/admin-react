@@ -19,6 +19,21 @@ const menuItems = [
   //   label: '온보딩 지표 분석',
   // },
   {
+    key: 'partners',
+    icon: <GiftOutlined />,
+    label: 'Partners',
+    children: [
+      {
+        key: '/voucher-codes/sales',
+        label: '파트너 판매 실적',
+      },
+      {
+        key: '/partners/orders/physical',
+        label: '주문 관리',
+      },
+    ],
+  },
+  {
     key: 'founder-membership',
     icon: <GiftOutlined />,
     label: 'Founder Membership',
@@ -26,10 +41,6 @@ const menuItems = [
       {
         key: '/voucher-codes',
         label: '코드 목록',
-      },
-      {
-        key: '/voucher-codes/sales',
-        label: '유저별 판매 실적',
       },
     ],
   },
@@ -170,7 +181,7 @@ function Sidebar({ isMobile = false, open = false, onClose }) {
   const location = useLocation()
 
   const handleMenuClick = ({ key }) => {
-    if (key === 'founder-membership') {
+    if (key === 'founder-membership' || key === 'partners') {
       return
     }
     navigate(key)
@@ -213,6 +224,9 @@ function Sidebar({ isMobile = false, open = false, onClose }) {
     if (path.startsWith('/voucher-codes/sales')) {
       return ['/voucher-codes/sales']
     }
+    if (path.startsWith('/partners/orders/physical')) {
+      return ['/partners/orders/physical']
+    }
     if (path.startsWith('/voucher-codes')) {
       return ['/voucher-codes']
     }
@@ -243,7 +257,8 @@ function Sidebar({ isMobile = false, open = false, onClose }) {
     if (path.startsWith('/games')) keys.push('/games')
     if (path.startsWith('/k-life')) keys.push('/k-life')
     if (path.startsWith('/class-reservation')) keys.push('/class-reservation')
-    if (path.startsWith('/voucher-codes')) keys.push('founder-membership')
+    if (path.startsWith('/voucher-codes/sales') || path.startsWith('/partners/orders/physical')) keys.push('partners')
+    if (path.startsWith('/voucher-codes') && !path.startsWith('/voucher-codes/sales')) keys.push('founder-membership')
     return keys
   }, [location.pathname])
   const openKeys = useMemo(

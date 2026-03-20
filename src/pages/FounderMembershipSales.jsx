@@ -374,7 +374,7 @@ function FounderMembershipSales() {
 
   return (
     <div className="founder-membership-sales">
-      <Title level={4}>유저별 판매 실적</Title>
+      <Title level={4}>파트너 판매 실적</Title>
       <Card>
         <Space wrap className="founder-membership-sales-filters">
           <Space>
