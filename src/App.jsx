@@ -10,6 +10,10 @@ import ImageManagement from './pages/ImageManagement'
 import BannerManagement from './pages/BannerManagement'
 import BannerImageManagement from './pages/BannerImageManagement'
 import GAEventManagement from './pages/GAEventManagement'
+import AppEventManagement from './pages/AppEventManagement'
+import AppNoticeManagement from './pages/AppNoticeManagement'
+import EventImageManagement from './pages/EventImageManagement'
+import NoticeImageManagement from './pages/NoticeImageManagement'
 import GameManagement from './pages/GameManagement'
 import GameDataDetail from './pages/GameDataDetail'
 import OnboardingAnalytics from './pages/OnboardingAnalytics'
@@ -47,6 +51,10 @@ function App() {
             <Route path="banner" element={<BannerManagement />} />
             <Route path="banner/images" element={<BannerImageManagement />} />
             <Route path="ga-events" element={<GAEventManagement />} />
+            <Route path="app-events" element={<AppEventManagement />} />
+            <Route path="app-notices" element={<AppNoticeManagement />} />
+            <Route path="app-events/images" element={<EventImageManagement />} />
+            <Route path="app-notices/images" element={<NoticeImageManagement />} />
             <Route path="onboarding-analytics" element={<OnboardingAnalytics />} />
             <Route path="chat" element={<ChatManagement />} />
             <Route path="in-app-mail" element={<InAppMail />} />

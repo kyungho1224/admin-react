@@ -61,6 +61,38 @@ const menuItems = [
     ],
   },
   {
+    key: 'app-events',
+    icon: <BarChartOutlined />,
+    label: '이벤트 관리',
+    children: [
+      {
+        key: '/app-events',
+        label: '이벤트 목록',
+      },
+      {
+        key: '/app-events/images',
+        icon: <PictureOutlined />,
+        label: '이미지 관리',
+      },
+    ],
+  },
+  {
+    key: 'app-notices',
+    icon: <NotificationOutlined />,
+    label: '공지사항 관리',
+    children: [
+      {
+        key: '/app-notices',
+        label: '공지사항 목록',
+      },
+      {
+        key: '/app-notices/images',
+        icon: <PictureOutlined />,
+        label: '이미지 관리',
+      },
+    ],
+  },
+  {
     key: '/banner',
     icon: <FileImageOutlined />,
     label: '메인 배너 관리',
@@ -209,6 +241,18 @@ function Sidebar({ isMobile = false, open = false, onClose }) {
     if (path.startsWith('/popup')) {
       return ['/popup']
     }
+    if (path.startsWith('/app-events/images')) {
+      return ['/app-events/images']
+    }
+    if (path.startsWith('/app-events')) {
+      return ['/app-events']
+    }
+    if (path.startsWith('/app-notices/images')) {
+      return ['/app-notices/images']
+    }
+    if (path.startsWith('/app-notices')) {
+      return ['/app-notices']
+    }
     if (path.startsWith('/games') && !path.startsWith('/games/data')) {
       return ['/games']
     }
@@ -255,6 +299,8 @@ function Sidebar({ isMobile = false, open = false, onClose }) {
     if (path.startsWith('/popup') || path.startsWith('/images')) keys.push('/popup')
     if (path.startsWith('/banner')) keys.push('/banner')
     if (path.startsWith('/games')) keys.push('/games')
+    if (path.startsWith('/app-events')) keys.push('app-events')
+    if (path.startsWith('/app-notices')) keys.push('app-notices')
     if (path.startsWith('/k-life')) keys.push('/k-life')
     if (path.startsWith('/class-reservation')) keys.push('/class-reservation')
     if (path.startsWith('/voucher-codes/sales') || path.startsWith('/partners/orders/physical')) keys.push('partners')
