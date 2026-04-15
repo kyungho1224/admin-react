@@ -135,3 +135,82 @@ export async function getAdminNoticeDetail(noticeId) {
   }
   return handleResponse(response)
 }
+
+export async function createAdminNotice(noticeData) {
+  const response = await fetch(
+    getServiceUrl(ServicePort.NOTIFICATION, '/v3/admin/notices'),
+    {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(noticeData),
+    }
+  )
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(errorData.detail || errorData.result?.message || `HTTP error! status: ${response.status}`)
+  }
+  return handleResponse(response)
+}
+
+export async function updateAdminNotice(noticeId, updateData) {
+  const response = await fetch(
+    getServiceUrl(ServicePort.NOTIFICATION, `/v3/admin/notices/${noticeId}`),
+    {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(updateData),
+    }
+  )
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(errorData.detail || errorData.result?.message || `HTTP error! status: ${response.status}`)
+  }
+  return handleResponse(response)
+}
+
+export async function createAdminNoticeItem(noticeId, itemData) {
+  const response = await fetch(
+    getServiceUrl(ServicePort.NOTIFICATION, `/v3/admin/notices/${noticeId}/items`),
+    {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(itemData),
+    }
+  )
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(errorData.detail || errorData.result?.message || `HTTP error! status: ${response.status}`)
+  }
+  return handleResponse(response)
+}
+
+export async function updateAdminNoticeItem(noticeId, itemId, updateData) {
+  const response = await fetch(
+    getServiceUrl(ServicePort.NOTIFICATION, `/v3/admin/notices/${noticeId}/items/${itemId}`),
+    {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(updateData),
+    }
+  )
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(errorData.detail || errorData.result?.message || `HTTP error! status: ${response.status}`)
+  }
+  return handleResponse(response)
+}
+
+export async function deleteAdminNoticeItem(noticeId, itemId) {
+  const response = await fetch(
+    getServiceUrl(ServicePort.NOTIFICATION, `/v3/admin/notices/${noticeId}/items/${itemId}`),
+    {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    }
+  )
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(errorData.detail || errorData.result?.message || `HTTP error! status: ${response.status}`)
+  }
+  return handleResponse(response)
+}
