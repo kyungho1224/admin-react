@@ -138,11 +138,14 @@ function PhysicalOrdersManagement() {
       const customerPhone = getValueByKeys(row, ['customerPhone', 'customer_phone']) || '-'
       const productId = getValueByKeys(row, ['product_id', 'productId'])
       const productTitleI18n = getValueByKeys(row, ['productTitleI18n', 'product_title_i18n']) || {}
-      const productTitle = productTitleI18n?.ko || getValueByKeys(row, ['product_title', 'productTitle', 'title']) || '-'
+      const productName = getValueByKeys(row, ['productName', 'product_name'])
+      const productOptionLabel = getValueByKeys(row, ['productOptionLabel', 'product_option_label'])
+      const productTitle = productName || productTitleI18n?.ko || getValueByKeys(row, ['product_title', 'productTitle', 'title']) || '-'
       const productSubtotal = getValueByKeys(row, ['productSubtotal', 'product_subtotal'])
       const shippingFeeTotal = getValueByKeys(row, ['shippingFeeTotal', 'shipping_fee_total', 'shippingFee', 'shipping_fee'])
       const totalAmount = getValueByKeys(row, ['totalAmount', 'total_amount', 'amount'])
       const currency = getValueByKeys(row, ['currency']) || 'KRW'
+      const source = getValueByKeys(row, ['source']) || '-'
       const quantity = getValueByKeys(row, ['quantity']) ?? '-'
       const shippingFee = getValueByKeys(row, ['shippingFee', 'shipping_fee']) ?? '-'
       const orderedAt = getValueByKeys(row, ['paidAt', 'paid_at', 'ordered_at', 'orderedAt', 'created_at'])
@@ -166,10 +169,12 @@ function PhysicalOrdersManagement() {
         _customerPhone: customerPhone,
         _productId: productId,
         _productTitle: productTitle,
+        _productOptionLabel: productOptionLabel || '',
         _productTitleI18n: productTitleI18n,
         _productSubtotal: productSubtotal,
         _shippingFeeTotal: shippingFeeTotal,
         _totalAmount: totalAmount,
+        _source: source,
         _quantity: quantity,
         _shippingFee: shippingFee,
         _currency: currency,
@@ -276,10 +281,12 @@ function PhysicalOrdersManagement() {
       닉네임: row._nickname ?? '-',
       상품ID: row._productId ?? '-',
       상품명: row._productTitle ?? '-',
+      옵션: row._productOptionLabel || '-',
       상품가격: row._productSubtotal ?? '-',
       배송비: row._shippingFeeTotal ?? '-',
       최종금액: row._totalAmount ?? '-',
       통화: row._currency ?? 'KRW',
+      유입경로: row._source ?? '-',
       택배사코드: row._carrierCode ?? '-',
       송장번호: row._trackingNo ?? '-',
       주문시각: formatDateTime(row._orderedAt),
@@ -314,7 +321,18 @@ function PhysicalOrdersManagement() {
       },
     },
     { title: '구매자', dataIndex: '_customerName', key: '_customerName', width: 100, ellipsis: true },
-    { title: '상품명', dataIndex: '_productTitle', key: '_productTitle', width: 180, ellipsis: true },
+    {
+      title: '상품명',
+      key: '_productTitle',
+      width: 220,
+      render: (_, row) => (
+        <Space direction="vertical" size={0}>
+          <Text>{row._productTitle || '-'}</Text>
+          {row._productOptionLabel && <Text type="secondary">{row._productOptionLabel}</Text>}
+        </Space>
+      ),
+    },
+    { title: '유입경로', dataIndex: '_source', key: '_source', width: 90, render: (v) => v || '-' },
     {
       title: '최종 금액',
       key: '_totalAmount',
@@ -516,6 +534,7 @@ function PhysicalOrdersManagement() {
             <Descriptions size="small" bordered column={2} title="상품정보">
               <Descriptions.Item label="상품 ID">{detailTarget._productId ?? '-'}</Descriptions.Item>
               <Descriptions.Item label="상품명">{detailTarget._productTitle ?? '-'}</Descriptions.Item>
+              <Descriptions.Item label="옵션">{detailTarget._productOptionLabel || '-'}</Descriptions.Item>
               <Descriptions.Item label="수량">{detailTarget._quantity ?? '-'}</Descriptions.Item>
               <Descriptions.Item label="상품 가격">
                 {detailTarget._productSubtotal != null ? `${Number(detailTarget._productSubtotal).toLocaleString()} ${detailTarget._currency}` : '-'}
@@ -534,6 +553,7 @@ function PhysicalOrdersManagement() {
               </Descriptions.Item>
               <Descriptions.Item label="내부 ID">{detailTarget._orderId ?? '-'}</Descriptions.Item>
               <Descriptions.Item label="주문상태">{detailTarget._paymentStatus ?? '-'}</Descriptions.Item>
+              <Descriptions.Item label="유입경로">{detailTarget._source ?? '-'}</Descriptions.Item>
               <Descriptions.Item label="배송상태">{STATUS_LABEL_MAP[detailTarget._shippingStatus]?.text ?? detailTarget._shippingStatus ?? '-'}</Descriptions.Item>
               <Descriptions.Item label="택배사명">
                 {detailTarget._carrierCode ? shippingCarrierNameMap[detailTarget._carrierCode] || detailTarget._carrierCode : '-'}
