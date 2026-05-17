@@ -17,10 +17,10 @@ export const ServicePort = {
 }
 
 // 환경 설정
-// const DEV_HOST = 'https://dev.baseapi.funpik.net'
-const DEV_HOST = 'http://localhost'
-const PROD_HOST = 'http://localhost'
-// const PROD_HOST = 'https://production.baseapi.funpik.net'
+const DEV_HOST = 'https://dev.baseapi.funpik.net'
+// const DEV_HOST = 'http://localhost'
+// const PROD_HOST = 'http://localhost'
+const PROD_HOST = 'https://production.baseapi.funpik.net'
 
 /**
  * 현재 환경 확인
